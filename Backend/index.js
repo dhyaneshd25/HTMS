@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const app = express();
 app.use(express.json());
 
-const mongoURI = 'mongodb+srv://dhyaneshd7:Dharmik2001@cluster0.pharjkj.mongodb.net/';
+const mongoURI = 'mongodb://localhost:27017/hospitalTokens';
 
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connected to MongoDB'))
