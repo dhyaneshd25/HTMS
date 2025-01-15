@@ -1,8 +1,6 @@
 const express=require("express")
 const mongoose = require('mongoose');
 
-
-
 const app = express();
 app.use(express.json());
 
@@ -29,6 +27,7 @@ const doctor = mongoose.model('Doctor', doctorschema);
 
 const staffschema = new mongoose.Schema({
   staff_name :{type : String,required:true},
+  hos_id :{type :mongoose.Schema.Types.ObjectId,ref: 'Hospital',required:true},
   doc_id :{type :mongoose.Schema.Types.ObjectId,ref: 'Doctor',required:true}  
 })
 
@@ -52,6 +51,7 @@ const patientschema = new mongoose.Schema({
           },
         }
       },
+      status: { type: String, enum: ['active', 'missing','completed'], default: 'active' }
 })
 
 const patient = mongoose.model('Patient', patientschema);
@@ -93,12 +93,26 @@ app.post('/add-doctor',async(req,res)=>{
 })
 
 
-
+app.post('/add-staff',async(req,res)=>{
+  try{
+    const {staff_name,hos_id,doc_id}= req.body;
+    const staf= new staff({
+      staff_name:staff_name,
+      hos_id:hos_id,
+      doc_id:doc_id
+    })
+    await staf.save();
+    res.status(200).send("Staff added successfully");
+  }catch(err){
+    res.status(500).send(err)
+  }
+})
 
 app.post('/add-patient',async(req,res)=>{
   try{
 
   }catch(err){
-    
+
   }
 })
+
