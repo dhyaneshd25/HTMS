@@ -29,6 +29,7 @@ const doctor = mongoose.model('Doctor', doctorschema);
 
 const staffschema = new mongoose.Schema({
   staff_name :{type : String,required:true},
+  hos_id :{type :mongoose.Schema.Types.ObjectId,ref: 'Hospital',required:true},
   doc_id :{type :mongoose.Schema.Types.ObjectId,ref: 'Doctor',required:true}  
 })
 
@@ -52,6 +53,7 @@ const patientschema = new mongoose.Schema({
           },
         }
       },
+      status: { type: String, enum: ['active', 'missing','completed'], default: 'active' }
 })
 
 const patient = mongoose.model('Patient', patientschema);
@@ -92,10 +94,20 @@ app.post('/add-doctor',async(req,res)=>{
   }
 })
 
+app.post('/add-staff',async(req,res)=>{
+  try{
+
+    
+
+  }catch(err){
+
+  }
+})
+
 app.post('/add-patient',async(req,res)=>{
   try{
 
   }catch(err){
-    
+
   }
 })
