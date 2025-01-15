@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const app = express();
 app.use(express.json());
 
-const mongoURI = 'mongodb://localhost:27017/hospitalTokens';
+const mongoURI = 'mongodb+srv://dhyaneshd7:Dharmik2001@cluster0.pharjkj.mongodb.net/';
 
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connected to MongoDB'))
@@ -140,3 +140,6 @@ app.post('/add-patient',async(req,res)=>{
 
 })
 
+
+
+// ths sdjdfhasjkfh
