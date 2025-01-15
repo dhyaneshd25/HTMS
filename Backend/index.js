@@ -133,12 +133,10 @@ app.post('/add-patient',async(req,res)=>{
     })
     await pat.save()
   }
-<<<<<<< HEAD
     res.status(200).send("Patient Successfully added...")
   }catch(err){
     res.status(500).send(err)
   }
-=======
->>>>>>> 1cc53b4f9251021935eb50c4a5d926d2ae51a94e
+
 })
 
