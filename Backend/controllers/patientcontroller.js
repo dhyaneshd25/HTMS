@@ -10,9 +10,10 @@ module.exports.add_patient = async(req,res)=>{
         const alldoccount = await patient.countDocuments()
         const hosp = await hospital.findOne();
         const doc =  await doctor.findOne({hoc_id:hosp._id});
-        const sta = await staff.findOne({hoc_id:hosp_id});
+        const sta = await staff.findOne({hoc_id:hosp._id,doc_id:doc._id});
         if(alldoccount==0){
           const pat = new patient({
+            hos_id:hosp_id,
             doc_id:doc._id,
             staff_id:sta._id,
             mobile_no:mobile_no,
