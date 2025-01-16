@@ -2,7 +2,7 @@ const hospital = require('../models/hospitalmodel')
 const doctor = require('../models/doctormodel')
 const staff = require('../models/staffmodel')
 const patient = require('../models/patientmodel')
-
+const shared = require('../shareds/share')
 
 module.exports.add_patient = async(req,res)=>{
     try{
@@ -15,7 +15,9 @@ module.exports.add_patient = async(req,res)=>{
         const doc =  await doctor.findOne({hos_id:hosp._id});
        
         const sta = await staff.findOne({hos_id:hosp._id,doc_id:doc._id});
-        
+        if(alldoccount>=shared.max_patient_no){
+          res.status(500).send("Patient Limit reached....");
+        }
         if(alldoccount==0){
           const pat = new patient({
             hos_id:hosp._id,
@@ -45,4 +47,14 @@ module.exports.add_patient = async(req,res)=>{
         res.status(500).send(err)
       }
     
+}
+
+
+module.exports.deleteAllpatients = async(req,res) =>{
+  try{
+    await patient.deleteMany();
+    res.status(200).send("All patient deleted....")
+  }catch(err){
+    res.status(500).send(err)
+  }
 }
