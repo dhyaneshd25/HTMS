@@ -1,10 +1,19 @@
 const express=require("express")
 const mongoose = require('mongoose');
+const cors = require('cors')
+
 
 const app = express();
+
+app.use(cors({
+      origin: "http://localhost:5173",
+      methods: "GET,POST,DELETE,PUT",
+      credentials: true
+}))
+
 app.use(express.json());
 
-const mongoURI = 'mongodb://localhost:27017/hospitalTokens';
+const mongoURI = 'mongodb+srv://krushnasakhare965:Krushna123@cluster0.z5j76.mongodb.net/';
 
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connected to MongoDB'))
@@ -22,7 +31,7 @@ const doctor_router = require('./routes/doctorroute')
 const staff_router = require('./routes/staffroute')
 const patient_router = require('./routes/patientroute')
 
-app.use('/',hospital_router);
-app.use('/',doctor_router);
-app.use('/',staff_router);
-app.use('/',patient_router);
+app.use('/api',hospital_router);
+app.use('/api',doctor_router);
+app.use('/api',staff_router);
+app.use('/api',patient_router);

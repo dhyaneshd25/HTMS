@@ -7,13 +7,28 @@ const patient = require('../models/patientmodel')
 module.exports.add_patient = async(req,res)=>{
     try{
         const {patient_name,patient_desc,mobile_no} = await req.body;
-        const alldoccount = await patient.countDocuments()
+
+        if (!patient_name) {
+          console.log("Patient name is not found");
+        }
+        if (!patient_desc) {
+          console.log("Patient description is not found");
+        }
+        if (!mobile_no) {
+          console.log("Mobile Number is not found");
+        }
+        
+        let alldoccount = await patient.countDocuments()
+        console.log(alldoccount)
         const hosp = await hospital.findOne();
-        const doc =  await doctor.findOne({hoc_id:hosp._id});
-        const sta = await staff.findOne({hoc_id:hosp._id,doc_id:doc._id});
+        console.log(hosp)
+        const doc =  await doctor.findOne({hos_id:hosp._id});
+        console.log(doc)
+        const sta = await staff.findOne({hos_id:hosp._id,doc_id:doc._id});
+        console.log(sta)
         if(alldoccount==0){
           const pat = new patient({
-            hos_id:hosp_id,
+            hos_id:hosp._id,
             doc_id:doc._id,
             staff_id:sta._id,
             mobile_no:mobile_no,
@@ -24,7 +39,8 @@ module.exports.add_patient = async(req,res)=>{
           await pat.save()
         }else{
           alldoccount++;
-        const pat = new patient({
+          console.log(alldoccount)
+         const pat = new patient({
           hos_id:hosp._id,
           doc_id:doc._id,
           staff_id:sta._id,
