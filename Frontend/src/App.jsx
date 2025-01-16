@@ -9,17 +9,15 @@ import ReceptionistDashboard from "./Page/Receiptionist/ReceptionDashbaord";
 function App() {
 
   return (
-    <BrowserRouter>
+    
       <Routes>
-        <Route element={<Applayout />}>
-          <Route index element={<Navigate to="/patient" replace />} />
-          <Route path="/patient" element={<PatientDashboard />} />
+        <Route>
+         <Route path="/patient" element={<PatientDashboard />} />
           <Route path="/doctor" element={<DoctorDashboard />} />
           <Route path="/receptionist" element={<ReceptionistDashboard />} />
-          <Route path="*" element={<Navigate to="/patient" replace />} />
-        </Route>
+       </Route>
       </Routes>
-    </BrowserRouter>
+  
   );
 }
 
