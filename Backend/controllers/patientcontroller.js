@@ -44,13 +44,42 @@ module.exports.add_patient = async(req,res)=>{
         await pat.save()
       }
         res.status(200).send("Patient Successfully added...")
-    }
+    } 
       }catch(err){
         res.status(500).send(err)
       }
     
 }
 
+module.exports.get_all_patients = async(req,res)=>{
+  try{
+    const allpatient  = await patient.find();
+    res.status(200).send({pateintlist : allpatient})
+  }catch(err){
+    res.status(500).send(err)
+  }
+}
+module.exports.get_status = async(req,res)=>{
+  try{
+    const totalpatientcount = await patient.countDocuments();
+    if(totalpatientcount==0){
+        return res.status(200).send({statuslist:[-1,-1]})
+    }else{
+      const activecount =await patient.countDocuments({status:"active"})
+      if(activecount==1){
+        const allactivepatient =  await patient.find({status:"active"})
+        return res.status(200).send({statuslist:[allactivepatient[0].token_number,-1]})
+      }else if(activecount==0){
+        return res.status(200).send({statuslist:[-1,-1]})
+      }else{
+        const allactivepatient = await patient.find({status:"active"})
+        return res.status(200).send({statuslist:[allactivepatient[0].token_number,allactivepatient[1].token_number]})
+      }
+    }
+  }catch(err){
+    return res.status(500).send(err);
+  }
+}
 
 module.exports.deleteAllpatients = async(req,res) =>{
   try{
