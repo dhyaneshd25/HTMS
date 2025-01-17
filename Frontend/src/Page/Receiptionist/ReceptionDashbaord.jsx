@@ -1,55 +1,123 @@
 import React, { useEffect, useState } from 'react';
 import { Clock, UserCheck, UserX, Users, RotateCcw, Bell } from 'lucide-react';
 import axios from 'axios';
+import { useToast } from "@/hooks/use-toast"
+import Livedisplay from '../../components/ui/livedisplay';
+import Displaypatients from '../../components/displaypatients';
 
-const initialPatients = [
-  {
-    id: '1',
-    name: 'John Doe',
-    description: 'Regular checkup',
-    tokenNumber: 1,
-    status: 'waiting',
-    createdAt: new Date(),
-  },
-];
 
 export default function ReceptionistDashboard({ user, onLogout }) {
+  const { toast } = useToast()
+  const [totaltokens,setTotaltokens]=useState(0);
+  const [currentToken,setCurrentToken]=useState("N/A");
+  const [nextToken,setNextToken]=useState("N/A");
+  const [patients, setPatients] = useState([]);
+  const [missingpatient,setMissingpatient]=useState([])
+  const [completedpatient,setCompletedpatient]=useState([])
+  
+  const fetchTokens = async () => {
+    const res = await axios.get("http://localhost:2000/api/get-all-patient")
 
-  const totalTokens = 0;
-  const [patients, setPatients] = useState(initialPatients);
+    if (res.data) {
+     const alldata = res.data;
+     const lsi= alldata.pateintlist
+     let templist=[];
+     lsi.map((p,i)=>{
+       templist.push(p)
+     })
+       setPatients(templist)
+       templist=[]
+       lsi.map((p,i)=>{
+        if(p.status=="missing"){
+          templist.push(p)
+        }
+       })
+       setMissingpatient(templist)
+       templist=[]
+       lsi.map((p,i)=>{
+        if(p.status=="completed"){
+          templist.push(p)
+        }
+       })
+       setCompletedpatient(templist)
+    }
 
-  const handleAllowEntry = (patientId) => {
-    setPatients(patients.map(patient => 
-      patient.id === patientId 
-        ? { ...patient, status: 'in-consultation' }
-        : patient
-    ));
+    const resp = await axios.get("http://localhost:2000/api/get-status")
+    const status = resp.data.statuslist;
+    setTotaltokens(status[2])
+    if(status[0]==-1){
+      setCurrentToken("N/A")
+    }else{
+    setCurrentToken(status[0]);}
+    if(status[1]==-1){
+     setNextToken("N/A");
+    }else{
+    setNextToken(status[1]);}
+
+ }
+
+ const recallpatientusingtoken = async (token) => {
+   const data = {
+    token_no : token,
+   }
+   console.log(data)
+   try{
+    const res = await axios.post("http://localhost:2000/api/recall",data,{ withCredentials: true})
+ 
+     toast({
+       title: "Appointment Missed !!!",
+       description: "Apponintment marked missed successfully !!"
+    })
+    
+    fetchTokens()}
+    catch(err){
+     console.log(err)
+    }
+};
+
+  const markedascompleted = async () => {
+    if(currentToken!="N/A"){
+    const data = {
+     token_no : currentToken
+    }
+   const res = await axios.post("http://localhost:2000/api/mark-completed",data,{ withCredentials: true})
+
+   try{
+    toast({
+      title: "Appointment Completed !!!",
+      description: "Apponintment Completed successfully !!"
+   })
+   
+   fetchTokens()
+  }catch(err){
+    console.log(err)
+  }
+  }
   };
 
-  const handleCancelEntry = (patientId) => {
-    setPatients(patients.map(patient => 
-      patient.id === patientId 
-        ? { ...patient, status: 'cancelled' }
-        : patient
-    ));
-  };
+  const markedmiss = async () => {
+    if(currentToken!="N/A"){
+      const data = {
+       token_no : currentToken
+      }
+      try{
+     const res = await axios.post("http://localhost:2000/api/mark-miss",data,{ withCredentials: true})
+  
+      toast({
+        title: "Appointment Missed !!!",
+        description: "Apponintment marked missed successfully !!"
+     })
+     
+     fetchTokens()}
+     catch(err){
+      console.log(err)
+     }
+    }
+    };
 
-  const handleRollback = (patientId) => {
-    setPatients(patients.map(patient => 
-      patient.id === patientId 
-        ? { ...patient, status: 'waiting' }
-        : patient
-    ));
-  };
+  
 
   useEffect(() => {
-    const fetchTokens = async () => {
-       const res = await axios.get("http://localhost:2000/api/get-all-patient")
-
-       if (res.data) {
-          setPatients(res.data)
-       }
-    }
     fetchTokens()   
   }, [])
 
@@ -72,29 +140,8 @@ export default function ReceptionistDashboard({ user, onLogout }) {
       </header>
 
       <main className="max-w-8xl mx-auto px-14 py-8 space-y-8">
-
-      <div className="bg-blue-50 rounded-lg shadow p-6">
-          <div className="flex justify-between items-center gap-5">
-            <div className="flex items-center">
-              <Bell className="w-6 h-6 text-blue-600 mr-3" />
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-900">Now Serving Token: 
-                  <span className='text-blue-600 ml-2'>0</span>
-                  </h2>
-                <p className="text-sm text-gray-600">Current token being served at the hospital</p>
-              </div>
-              {/* <span className="text-2xl ml-5 bg-white p-3 font-bold text-blue-600">Token #{currentToken || 0}</span> */}
-            </div>
-
-               <div className='flex'>
-                 <span className='text-xl font-medium m-1'>Total Token:</span> 
-                 <span className='text-xl font-medium m-1'>{totalTokens || 0}</span> 
-               </div>
-            
-          </div>
-        </div>
-
-        {/* Waiting Patients Section */}
+      <Livedisplay current={currentToken} next={nextToken} total={totaltokens}/> 
+        {/* Waiting Patients Section 
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold flex items-center">
@@ -138,60 +185,22 @@ export default function ReceptionistDashboard({ user, onLogout }) {
             ))}
           </div>
         </div>
+         */}
 
+ 
         <div className='flex gap-5'>
-          <div className='bg-green-600 p-2 rounded text-white font-medium cursor-pointer'>
+          <button className='bg-green-600 p-2 rounded text-white font-medium cursor-pointer' onClick={markedascompleted}>
              Completed
-          </div>
+          </button>
 
-          <div className="bg-red-600 p-2 rounded text-white font-medium cursor-pointer">
+          <button className="bg-red-600 p-2 rounded text-white font-medium cursor-pointer" onClick={markedmiss}>
              Missed
-          </div>
+          </button>
         </div>
 
         {/* All Patients Status Table */}
         <div className='flex justify-center gap-5'>
-          <div className="bg-white rounded-lg  w-1/2 shadow overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold flex items-center">
-                <Users className="w-5 h-5 mr-2" />
-                Today's Patient
-              </h2>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Token
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Patient Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Description
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {initialPatients?.map((patient) => (
-                    <tr key={patient.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        #{patient.tokenNumber}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {patient.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {patient.description}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
+        <Displaypatients patientlist={patients}/>
           <div className="bg-white rounded-lg shadow  w-1/2 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-xl font-semibold flex items-center">
@@ -218,29 +227,33 @@ export default function ReceptionistDashboard({ user, onLogout }) {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {initialPatients?.map((patient) => (
-                    <tr key={patient.id}>
+                  {missingpatient.map((patient,index) => (
+                  
+                    <tr key={index}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        #{patient.tokenNumber}
+                        #{patient.token_number}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {patient.name}
+                        {patient.patient_name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {patient.description}
+                        {patient.patient_desc}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button className='font-medium border border-gray-300 p-2 rounded cursor-pointer'>
-                          Rollback
+                        <button className='font-medium border border-gray-300 p-2 rounded cursor-pointer' onClick={()=>{recallpatientusingtoken(patient.token_number)}}>
+                          Recall
                         </button>
                       </td>
                     </tr>
+                  
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>              
+          </div>   
+                    
         </div>
+        
       </main>
     </div>
   );

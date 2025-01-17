@@ -4,10 +4,13 @@ import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { Toaster } from "../../Components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
+import Livedisplay from '../../components/ui/livedisplay';
 
 
 export default function PatientDashboard({ user, onLogout }) {
-  const [currentToken, setCurrentToken] = useState(5);
+  const [totaltokens,setTotaltokens]=useState(0);
+  const [currentToken,setCurrentToken]=useState("N/A");
+  const [nextToken,setNextToken]=useState("N/A");
   const [myAppointments, setMyAppointments] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const totalTokens = 0;
@@ -28,19 +31,27 @@ export default function PatientDashboard({ user, onLogout }) {
   //   }
   // };
 
-  // useEffect(() => {
-  //   const fetchCurrentToken = async () => {
-  //     try {
-  //       const response = await fetch('/api/current-token');
-  //       setCurrentToken(response.currentToken);
-  //     } catch (error) {
-  //       console.error('Failed to fetch current token:', error);
-  //     }
-  //   };
-  //   fetchCurrentToken();
-  //   const interval = setInterval(fetchCurrentToken, 30000);
-  //   return () => clearInterval(interval);
-  // }, []);
+  const fetchstatus = async()=>{
+    const resp = await axios.get("http://localhost:2000/api/get-status")
+    const status = resp.data.statuslist;
+    setTotaltokens(status[2])
+    if(status[0]==-1){
+      setCurrentToken("N/A")
+    }else{
+    setCurrentToken(status[0]);}
+    if(status[1]==-1){
+     setNextToken("N/A");
+    }else{
+    setNextToken(status[1]);}
+  }
+
+  useEffect(() => {
+    fetchstatus()
+    const intervalId = setInterval(fetchstatus, 5000);
+
+
+    return () => clearInterval(intervalId);
+  },[]);
 
 
   const onSubmit = async (data) => {
@@ -86,27 +97,7 @@ export default function PatientDashboard({ user, onLogout }) {
 
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         {/* Current Token Display */}
-        <div className="bg-blue-50 rounded-lg shadow p-6">
-          <div className="flex justify-between items-center gap-5">
-            <div className="flex items-center">
-              <Bell className="w-6 h-6 text-blue-600 mr-3" />
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-900">Now Serving Token: 
-                  <span className='text-blue-600 ml-2'>0</span>
-                  </h2>
-                <p className="text-sm text-gray-600">Current token being served at the hospital</p>
-              </div>
-              {/* <span className="text-2xl ml-5 bg-white p-3 font-bold text-blue-600">Token #{currentToken || 0}</span> */}
-            </div>
-
-               <div className='flex'>
-                 <span className='text-xl font-medium m-1'>Total Token:</span> 
-                 <span className='text-xl font-medium m-1'>{totalTokens || 0}</span> 
-               </div>
-            
-          </div>
-        </div>
-
+       <Livedisplay  current={currentToken} next={nextToken} total={totaltokens}/>
         {/* My Appointments */}
         <div className="bg-white rounded-lg shadow">
           {/* <div className="px-6 py-4 border-b border-gray-200">

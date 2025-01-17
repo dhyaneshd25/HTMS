@@ -64,17 +64,17 @@ module.exports.get_status = async(req,res)=>{
   try{
     const totalpatientcount = await patient.countDocuments();
     if(totalpatientcount==0){
-        return res.status(200).send({statuslist:[-1,-1]})
+        return res.status(200).send({statuslist:[-1,-1,0]})
     }else{
       const activecount =await patient.countDocuments({status:"active"})
       if(activecount==1){
         const allactivepatient =  await patient.find({status:"active"})
-        return res.status(200).send({statuslist:[allactivepatient[0].token_number,-1]})
+        return res.status(200).send({statuslist:[allactivepatient[0].token_number,-1,totalpatientcount]})
       }else if(activecount==0){
-        return res.status(200).send({statuslist:[-1,-1]})
+        return res.status(200).send({statuslist:[-1,-1,totalpatientcount]})
       }else{
         const allactivepatient = await patient.find({status:"active"})
-        return res.status(200).send({statuslist:[allactivepatient[0].token_number,allactivepatient[1].token_number]})
+        return res.status(200).send({statuslist:[allactivepatient[0].token_number,allactivepatient[1].token_number,totalpatientcount]})
       }
     }
   }catch(err){

@@ -1,19 +1,57 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ClipboardList, UserCheck, Settings, Users } from 'lucide-react';
 import axios from "axios";
+import Livedisplay from '../../components/ui/livedisplay';
+import Displaypatients from '../../components/displaypatients';
 
 export default function DoctorDashboard({ user, onLogout }) {
-  const [maxPatients, setMaxPatients] = useState(10);
-  const [patients, setPatients] = useState([
-    {
-      id: '1',
-      name: 'John Doe',
-      description: 'Regular checkup',
-      tokenNumber: 1,
-      status: 'in-consultation',
-      createdAt: new Date(),
-    },
-  ]);
+    const [maxPatients, setMaxPatients] = useState(10);
+    const [totaltokens,setTotaltokens]=useState(0);
+    const [currentToken,setCurrentToken]=useState("N/A");
+    const [nextToken,setNextToken]=useState("N/A");
+    const [patients, setPatients] = useState([]);
+    const [completedpatient,setCompletedpatient]=useState([])
+  const fetchTokens = async () => {
+    const res = await axios.get("http://localhost:2000/api/get-all-patient")
+
+    if (res.data) {
+     const alldata = res.data;
+     const lsi= alldata.pateintlist
+     let templist=[];
+     lsi.map((p,i)=>{
+       templist.push(p)
+     })
+       setPatients(templist)
+       templist=[]
+       lsi.map((p,i)=>{
+        if(p.status=="completed"){
+          templist.push(p)
+        }
+       })
+       setCompletedpatient(templist)
+    }
+
+    const resp = await axios.get("http://localhost:2000/api/get-status")
+    const status = resp.data.statuslist;
+    setTotaltokens(status[2])
+    if(status[0]==-1){
+      setCurrentToken("N/A")
+    }else{
+    setCurrentToken(status[0]);}
+    if(status[1]==-1){
+     setNextToken("N/A");
+    }else{
+    setNextToken(status[1]);}
+
+ }
+
+useEffect(() => {
+    fetchTokens()
+    const intervalId = setInterval(fetchTokens, 5000);
+
+
+    return () => clearInterval(intervalId);
+  },[]);
 
   // const handleMaxPatientsChange = (e) => {
   //   const valu e = parseInt(e.target.value, 10);
@@ -65,30 +103,9 @@ export default function DoctorDashboard({ user, onLogout }) {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+        <Livedisplay current={currentToken} next={nextToken} total={totaltokens}/>
         {/* Settings Section */}
-        {/* <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center">
-            <Settings className="w-5 h-5 mr-2" />
-            <h2 className="text-xl font-semibold">Appointment Settings</h2>
-          </div>
-          <div className="p-6">
-            <div className="flex items-center space-x-4">
-              <label className="text-sm font-medium text-gray-700">
-                Maximum patients per day:
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="50"
-                value={maxPatients}
-                onChange={handleMaxPatientsChange}
-                className="w-24 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-        </div> */}
-
-<div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
   <div className="px-6 py-4 border-b border-gray-200 flex items-center">
     <Settings className="w-5 h-5 mr-2" />
     <h2 className="text-xl font-semibold">Appointment Settings</h2>
@@ -106,12 +123,13 @@ export default function DoctorDashboard({ user, onLogout }) {
       </button>
     </div>
   </div>
-</div>
-
+         </div>
+        <Displaypatients patientlist={patients}/>
+  
 
 
         {/* Current Patient Section */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+       {/*  <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold">Current Patient</h2>
           </div>
@@ -144,6 +162,7 @@ export default function DoctorDashboard({ user, onLogout }) {
             </div>
           ))}
         </div>
+        */}
       </main>
     </div>
   );

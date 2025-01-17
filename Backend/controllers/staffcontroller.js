@@ -48,12 +48,17 @@ module.exports.mark_completed = async(req,res) =>{
 
 module.exports.recall_patient = async(req,res) =>{
   try{
+    const countmissing = await patient.countDocuments({status:"missing"})
+    if(countmissing>0){
     const {token_no} = req.body;
     const pat = await patient.findOne({token_number:token_no,status:"missing"})
     pat.status = 'active'
     await pat.save()
-    res.status(200).send("Patient recalled.....")
+    return res.status(200).send("Patient recalled.....")
+    }else{
+      return res.status(200).send("No missing patients")
+    }
   }catch(err){
-    res.status(500).send(err)
+    return res.status(500).send(err)
   }
 }
