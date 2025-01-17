@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ClipboardList, UserCheck, Settings, Users } from 'lucide-react';
+import axios from "axios";
 
 export default function DoctorDashboard({ user, onLogout }) {
   const [maxPatients, setMaxPatients] = useState(10);
@@ -14,10 +15,38 @@ export default function DoctorDashboard({ user, onLogout }) {
     },
   ]);
 
-  const handleMaxPatientsChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    setMaxPatients(value);
+  // const handleMaxPatientsChange = (e) => {
+  //   const valu e = parseInt(e.target.value, 10);
+  //   setMaxPatients(value);
+  // };
+
+  const handleSetMaxPatients = async () => {
+    const value = prompt("Enter the maximum number of patients per day:");
+    if (value) {
+      const number = parseInt(value, 10);
+      if (!isNaN(number) && number > 0) {
+        try {
+          const response = await axios.post(
+            "http://localhost:2000/api/set-patient-limit",
+            { max_patient: number }
+          );
+  
+          if (response.status === 200) {
+            setMaxPatients(number);   
+            alert("Max patients updated successfully!");
+          } else {
+            alert("Failed to update max patients.");
+          }
+        } catch (error) {
+          console.error("Error updating max patients:", error);
+          alert("An error occurred while updating max patients.");
+        }
+      } else {
+        alert("Please enter a valid positive number.");
+      }
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -37,7 +66,7 @@ export default function DoctorDashboard({ user, onLogout }) {
 
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         {/* Settings Section */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        {/* <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 flex items-center">
             <Settings className="w-5 h-5 mr-2" />
             <h2 className="text-xl font-semibold">Appointment Settings</h2>
@@ -57,7 +86,29 @@ export default function DoctorDashboard({ user, onLogout }) {
               />
             </div>
           </div>
-        </div>
+        </div> */}
+
+<div className="bg-white rounded-lg shadow-lg overflow-hidden">
+  <div className="px-6 py-4 border-b border-gray-200 flex items-center">
+    <Settings className="w-5 h-5 mr-2" />
+    <h2 className="text-xl font-semibold">Appointment Settings</h2>
+  </div>
+  <div className="p-6">
+    <div className="flex items-center space-x-4">
+      <label className="text-sm font-medium text-gray-700">
+        Maximum patients per day: {maxPatients}
+      </label>
+      <button
+        onClick={handleSetMaxPatients}
+        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+      >
+        Set Maximum Patients
+      </button>
+    </div>
+  </div>
+</div>
+
+
 
         {/* Current Patient Section */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">

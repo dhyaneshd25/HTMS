@@ -15,9 +15,10 @@ module.exports.add_patient = async(req,res)=>{
         const doc =  await doctor.findOne({hos_id:hosp._id});
        
         const sta = await staff.findOne({hos_id:hosp._id,doc_id:doc._id});
+
         if(alldoccount>=shared.max_patient_no){
-          res.status(500).send("Patient Limit reached....");
-        }
+          res.status(200).send({data:"Patient Limit reached..."});
+        }else{
         if(alldoccount==0){
           const pat = new patient({
             hos_id:hosp._id,
@@ -43,6 +44,7 @@ module.exports.add_patient = async(req,res)=>{
         await pat.save()
       }
         res.status(200).send("Patient Successfully added...")
+    }
       }catch(err){
         res.status(500).send(err)
       }
