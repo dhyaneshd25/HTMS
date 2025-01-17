@@ -2,45 +2,45 @@ import React, { useState, useEffect } from 'react';
 import { Clock, FileText, Bell } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
+import { Toaster } from "../../Components/ui/toaster"
+import { useToast } from "@/hooks/use-toast"
+
 
 export default function PatientDashboard({ user, onLogout }) {
   const [currentToken, setCurrentToken] = useState(5);
   const [myAppointments, setMyAppointments] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const totalTokens = 0;
+  const { toast } = useToast()
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors }
-  } = useForm();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
+  // useEffect(() => {
+  //   fetchAppointments();
+  // }, []);
 
-  const fetchAppointments = async () => {
-    try {
-      const response = await axios('/api/appointments');
-      setMyAppointments(response);
-    } catch (error) {
-      console.error('Failed to fetch appointments:', error);
-    }
-  };
+  // const fetchAppointments = async () => {
+  //   try {
+  //     const response = await axios('/api/appointments');
+  //     setMyAppointments(response);
+  //   } catch (error) {
+  //     console.error('Failed to fetch appointments:', error);
+  //   }
+  // };
 
-  useEffect(() => {
-    const fetchCurrentToken = async () => {
-      try {
-        const response = await fetch('/api/current-token');
-        setCurrentToken(response.currentToken);
-      } catch (error) {
-        console.error('Failed to fetch current token:', error);
-      }
-    };
-    fetchCurrentToken();
-    const interval = setInterval(fetchCurrentToken, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  // useEffect(() => {
+  //   const fetchCurrentToken = async () => {
+  //     try {
+  //       const response = await fetch('/api/current-token');
+  //       setCurrentToken(response.currentToken);
+  //     } catch (error) {
+  //       console.error('Failed to fetch current token:', error);
+  //     }
+  //   };
+  //   fetchCurrentToken();
+  //   const interval = setInterval(fetchCurrentToken, 30000);
+  //   return () => clearInterval(interval);
+  // }, []);
 
 
   const onSubmit = async (data) => {
@@ -51,10 +51,17 @@ export default function PatientDashboard({ user, onLogout }) {
       });
       console.log("Response", response);
       reset();
-      alert('Appointment request submitted successfully!');
+      toast({
+         title: "Appointment Done !!!",
+         description: "Apponintment created successfully !!"
+      })
     } catch (error) {
       console.error('Error submitting appointment:', error);
-      alert('Failed to submit appointment. Please try again.');
+      toast({
+        title: "Error !!!",
+        description: "Failed to submit appointment. Please try again. !!",
+        variant: "destructive"
+     })
     } finally {
       setIsSubmitting(false);
     }
@@ -65,14 +72,14 @@ export default function PatientDashboard({ user, onLogout }) {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Patient Portal</h1>
-            <button
+          <div className="flex justify-center items-center">
+            <h1 className="text-3xl font-bold text-gray-900">Patient Portal</h1>
+            {/* <button
               onClick={onLogout}
               className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
             >
               Logout
-            </button>
+            </button> */}
           </div>
         </div>
       </header>
@@ -80,28 +87,34 @@ export default function PatientDashboard({ user, onLogout }) {
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         {/* Current Token Display */}
         <div className="bg-blue-50 rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between items-center gap-5">
             <div className="flex items-center">
               <Bell className="w-6 h-6 text-blue-600 mr-3" />
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Now Serving</h2>
+                <h2 className="text-2xl font-semibold text-gray-900">Now Serving Token: 
+                  <span className='text-blue-600 ml-2'>0</span>
+                  </h2>
                 <p className="text-sm text-gray-600">Current token being served at the hospital</p>
               </div>
+              {/* <span className="text-2xl ml-5 bg-white p-3 font-bold text-blue-600">Token #{currentToken || 0}</span> */}
             </div>
-            <div className="bg-white px-6 py-3 rounded-lg shadow-sm">
-              <span className="text-2xl font-bold text-blue-600">Token #{currentToken}</span>
-            </div>
+
+               <div className='flex'>
+                 <span className='text-xl font-medium m-1'>Total Token:</span> 
+                 <span className='text-xl font-medium m-1'>{totalTokens || 0}</span> 
+               </div>
+            
           </div>
         </div>
 
         {/* My Appointments */}
         <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
+          {/* <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold flex items-center">
               <Clock className="w-5 h-5 mr-2" />
               My Appointments
             </h2>
-          </div>
+          </div> */}
           <div className="divide-y divide-gray-200">
             {/* {myAppointments.map((appointment) => (
               <div key={appointment.id} className="p-6">
@@ -136,7 +149,7 @@ export default function PatientDashboard({ user, onLogout }) {
         </div>
 
         {/* Request Appointment Form */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-6 h-full overflow-y-auto">
           <h2 className="text-xl font-semibold mb-6 flex items-center">
             <FileText className="w-5 h-5 mr-2" />
             Request New Appointment
@@ -149,7 +162,7 @@ export default function PatientDashboard({ user, onLogout }) {
                   required: "Name is required",
                   minLength: { value: 2, message: "Name must be at least 2 characters" }
                 })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="p-2 mt-1 block w-full rounded-md border border-gray-300 shadow-sm"
               />
               {errors.name && (
                 <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
@@ -162,11 +175,15 @@ export default function PatientDashboard({ user, onLogout }) {
                 type='number'
                 {...register("mobile_no", { 
                   required: "Phone number is required",
+                  pattern: {
+                     value: /^[6-9]\d{9}$/,
+                     message: "Invalid Phone Number"
+                  }
                 })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="p-2 mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+              {errors.mobile_no && (
+                <p className="mt-1 text-sm text-red-600">{errors.mobile_no.message}</p>
               )}
             </div>
 
@@ -180,7 +197,7 @@ export default function PatientDashboard({ user, onLogout }) {
                   minLength: { value: 10, message: "Description must be at least 10 characters" }
                 })}
                 rows={4}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="p-2 mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
               {errors.description && (
                 <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
@@ -196,6 +213,8 @@ export default function PatientDashboard({ user, onLogout }) {
           </form>
         </div>
       </main>
+
+      <Toaster />
     </div>
   );
 }

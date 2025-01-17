@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Clock, UserCheck, UserX, Users, RotateCcw } from 'lucide-react';
+import axios from 'axios';
 
 const initialPatients = [
   {
@@ -10,50 +11,45 @@ const initialPatients = [
     status: 'waiting',
     createdAt: new Date(),
   },
-  {
-    id: '2',
-    name: 'Jane Smith',
-    description: 'Fever and cold',
-    tokenNumber: 2,
-    status: 'in-consultation',
-    createdAt: new Date(),
-  },
-  {
-    id: '3',
-    name: 'Mike Johnson',
-    description: 'Follow-up visit',
-    tokenNumber: 3,
-    status: 'completed',
-    createdAt: new Date(),
-  },
 ];
 
 export default function ReceptionistDashboard({ user, onLogout }) {
   const [patients, setPatients] = useState(initialPatients);
 
-  const handleAllowEntry = (patientId) => {
-    setPatients(patients.map(patient => 
-      patient.id === patientId 
-        ? { ...patient, status: 'in-consultation' }
-        : patient
-    ));
-  };
+  // const handleAllowEntry = (patientId) => {
+  //   setPatients(patients.map(patient => 
+  //     patient.id === patientId 
+  //       ? { ...patient, status: 'in-consultation' }
+  //       : patient
+  //   ));
+  // };
 
-  const handleCancelEntry = (patientId) => {
-    setPatients(patients.map(patient => 
-      patient.id === patientId 
-        ? { ...patient, status: 'cancelled' }
-        : patient
-    ));
-  };
+  // const handleCancelEntry = (patientId) => {
+  //   setPatients(patients.map(patient => 
+  //     patient.id === patientId 
+  //       ? { ...patient, status: 'cancelled' }
+  //       : patient
+  //   ));
+  // };
 
-  const handleRollback = (patientId) => {
-    setPatients(patients.map(patient => 
-      patient.id === patientId 
-        ? { ...patient, status: 'waiting' }
-        : patient
-    ));
-  };
+  // const handleRollback = (patientId) => {
+  //   setPatients(patients.map(patient => 
+  //     patient.id === patientId 
+  //       ? { ...patient, status: 'waiting' }
+  //       : patient
+  //   ));
+  // };
+
+  useEffect(() => {
+    const fetchTokens = async () => {
+       const res = await axios.get("http://localhost:2000/api/add-patient")
+
+       if (res.data) {
+          setPatients(res.data)
+       }
+    }
+    fetchTokens()   
+  }, [])
 
   const waitingPatients = patients.filter(p => p.status === 'waiting');
 
