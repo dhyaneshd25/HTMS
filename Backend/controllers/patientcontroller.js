@@ -59,6 +59,7 @@ module.exports.get_all_patients = async(req,res)=>{
     res.status(500).send(err)
   }
 }
+
 module.exports.get_status = async(req,res)=>{
   try{
     const totalpatientcount = await patient.countDocuments();

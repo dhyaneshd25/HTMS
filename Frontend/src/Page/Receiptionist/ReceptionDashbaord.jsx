@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Clock, UserCheck, UserX, Users, RotateCcw } from 'lucide-react';
+import { Clock, UserCheck, UserX, Users, RotateCcw, Bell } from 'lucide-react';
 import axios from 'axios';
 
 const initialPatients = [
@@ -14,35 +14,37 @@ const initialPatients = [
 ];
 
 export default function ReceptionistDashboard({ user, onLogout }) {
+
+  const totalTokens = 0;
   const [patients, setPatients] = useState(initialPatients);
 
-  // const handleAllowEntry = (patientId) => {
-  //   setPatients(patients.map(patient => 
-  //     patient.id === patientId 
-  //       ? { ...patient, status: 'in-consultation' }
-  //       : patient
-  //   ));
-  // };
+  const handleAllowEntry = (patientId) => {
+    setPatients(patients.map(patient => 
+      patient.id === patientId 
+        ? { ...patient, status: 'in-consultation' }
+        : patient
+    ));
+  };
 
-  // const handleCancelEntry = (patientId) => {
-  //   setPatients(patients.map(patient => 
-  //     patient.id === patientId 
-  //       ? { ...patient, status: 'cancelled' }
-  //       : patient
-  //   ));
-  // };
+  const handleCancelEntry = (patientId) => {
+    setPatients(patients.map(patient => 
+      patient.id === patientId 
+        ? { ...patient, status: 'cancelled' }
+        : patient
+    ));
+  };
 
-  // const handleRollback = (patientId) => {
-  //   setPatients(patients.map(patient => 
-  //     patient.id === patientId 
-  //       ? { ...patient, status: 'waiting' }
-  //       : patient
-  //   ));
-  // };
+  const handleRollback = (patientId) => {
+    setPatients(patients.map(patient => 
+      patient.id === patientId 
+        ? { ...patient, status: 'waiting' }
+        : patient
+    ));
+  };
 
   useEffect(() => {
     const fetchTokens = async () => {
-       const res = await axios.get("http://localhost:2000/api/add-patient")
+       const res = await axios.get("http://localhost:2000/api/get-all-patient")
 
        if (res.data) {
           setPatients(res.data)
@@ -51,7 +53,7 @@ export default function ReceptionistDashboard({ user, onLogout }) {
     fetchTokens()   
   }, [])
 
-  const waitingPatients = patients.filter(p => p.status === 'waiting');
+  // const waitingPatients = patients?.filter(p => p.status === 'waiting');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -70,6 +72,28 @@ export default function ReceptionistDashboard({ user, onLogout }) {
       </header>
 
       <main className="max-w-8xl mx-auto px-14 py-8 space-y-8">
+
+      <div className="bg-blue-50 rounded-lg shadow p-6">
+          <div className="flex justify-between items-center gap-5">
+            <div className="flex items-center">
+              <Bell className="w-6 h-6 text-blue-600 mr-3" />
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900">Now Serving Token: 
+                  <span className='text-blue-600 ml-2'>0</span>
+                  </h2>
+                <p className="text-sm text-gray-600">Current token being served at the hospital</p>
+              </div>
+              {/* <span className="text-2xl ml-5 bg-white p-3 font-bold text-blue-600">Token #{currentToken || 0}</span> */}
+            </div>
+
+               <div className='flex'>
+                 <span className='text-xl font-medium m-1'>Total Token:</span> 
+                 <span className='text-xl font-medium m-1'>{totalTokens || 0}</span> 
+               </div>
+            
+          </div>
+        </div>
+
         {/* Waiting Patients Section */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
@@ -79,7 +103,7 @@ export default function ReceptionistDashboard({ user, onLogout }) {
             </h2>
           </div>
           <div className="divide-y divide-gray-200">
-            {waitingPatients.map((patient) => (
+            {initialPatients?.map((patient) => (
               <div key={patient.id} className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -115,6 +139,16 @@ export default function ReceptionistDashboard({ user, onLogout }) {
           </div>
         </div>
 
+        <div className='flex gap-5'>
+          <div className='bg-green-600 p-2 rounded text-white font-medium cursor-pointer'>
+             Completed
+          </div>
+
+          <div className="bg-red-600 p-2 rounded text-white font-medium cursor-pointer">
+             Missed
+          </div>
+        </div>
+
         {/* All Patients Status Table */}
         <div className='flex justify-center gap-5'>
           <div className="bg-white rounded-lg  w-1/2 shadow overflow-hidden">
@@ -140,7 +174,7 @@ export default function ReceptionistDashboard({ user, onLogout }) {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {patients.map((patient) => (
+                  {initialPatients?.map((patient) => (
                     <tr key={patient.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         #{patient.tokenNumber}
@@ -184,7 +218,7 @@ export default function ReceptionistDashboard({ user, onLogout }) {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {patients.map((patient) => (
+                  {initialPatients?.map((patient) => (
                     <tr key={patient.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         #{patient.tokenNumber}
@@ -196,7 +230,9 @@ export default function ReceptionistDashboard({ user, onLogout }) {
                         {patient.description}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        rollback
+                        <button className='font-medium border border-gray-300 p-2 rounded cursor-pointer'>
+                          Rollback
+                        </button>
                       </td>
                     </tr>
                   ))}
