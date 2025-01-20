@@ -25,7 +25,7 @@ module.exports.set_maxpatientnumber = async(req,res)=>{
    const {max_patient} = req.body;
    shared.max_patient_no = max_patient;
 
-   res.status(200).send("Max_patient_limit is setted....");
+   return res.status(200).json({data: max_patient, message: "Max_patient_limit is setted...."});
 
    }catch(err){
       res.status(500).send("Internal Server Error")

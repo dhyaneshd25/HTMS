@@ -7,3 +7,45 @@
   }
 }
 
+.blink {
+  animation: blink-animation 1s infinite;
+}
+
+@keyframes blink-animation {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+
+
+.bell {
+  display: block;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  margin: 2px auto 0;
+  margin-right: 5px;
+  color: #49525b;
+  animation: ring 8s ease-in-out infinite; /* Slowed down animation */
+  transform-origin: 50% 4px;
+}
+
+@keyframes ring {
+  0%, 100% { transform: rotate(0); }
+  10% { transform: rotate(10deg); }
+  20% { transform: rotate(-10deg); }
+  30% { transform: rotate(8deg); }
+  40% { transform: rotate(-8deg); }
+  50% { transform: rotate(6deg); }
+  60% { transform: rotate(-6deg); }
+  70% { transform: rotate(4deg); }
+  80% { transform: rotate(-4deg); }
+  90% { transform: rotate(2deg); }
+}

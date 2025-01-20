@@ -189,20 +189,21 @@ export default function ReceptionistDashboard({ user, onLogout }) {
 
  
         <div className='flex gap-5'>
-          <button className='bg-green-600 p-2 rounded text-white font-medium cursor-pointer' onClick={markedascompleted}>
+          <button className='bg-green-600 p-2 rounded-md text-white font-medium cursor-pointer' onClick={markedascompleted}>
              Completed
           </button>
 
-          <button className="bg-red-600 p-2 rounded text-white font-medium cursor-pointer" onClick={markedmiss}>
+          <button className="bg-red-600 p-2 px-5 rounded-md text-white font-medium cursor-pointer" onClick={markedmiss}>
              Missed
           </button>
         </div>
 
         {/* All Patients Status Table */}
-        <div className='flex justify-center gap-5'>
+        <div className='h-full flex justify-center gap-5'>
         <Displaypatients patientlist={patients}/>
+          
           <div className="bg-white rounded-lg shadow  w-1/2 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200 shadow-2xl">
               <h2 className="text-xl font-semibold flex items-center">
                 <Users className="w-5 h-5 mr-2" />
                 Today's Missed Patient
@@ -212,41 +213,49 @@ export default function ReceptionistDashboard({ user, onLogout }) {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-base text-gray-800 font-medium uppercase tracking-wider">
                       Token
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-base text-gray-800 font-medium uppercase tracking-wider">
                       Patient Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-base text-gray-800 font-medium uppercase tracking-wider">
                       Description
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-base text-gray-800 font-medium uppercase tracking-wider">
                       Action
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {missingpatient.map((patient,index) => (
-                  
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {
+                   missingpatient?.length > 0 ? (
+                     missingpatient.map((patient,index) => (                
+                       <tr key={index}
+                         className={index % 2 == 0 ? "bg-gray-100" : ""}
+                       >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-750">
                         #{patient.token_number}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-750">
                         {patient.patient_name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-750">
                         {patient.patient_desc}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button className='font-medium border border-gray-300 p-2 rounded cursor-pointer' onClick={()=>{recallpatientusingtoken(patient.token_number)}}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-750">
+                        <button className='font-medium border border-gray-400 p-1 px-2 rounded-md cursor-pointer' onClick={()=>{recallpatientusingtoken(patient.token_number)}}>
                           Recall
                         </button>
                       </td>
-                    </tr>
-                  
-                  ))}
+                    </tr>               
+                  ))
+                  ) : (
+                    <div className='text-center'>
+                      No Missed Patient Available
+                    </div>
+                  )
+                }
                 </tbody>
               </table>
             </div>
