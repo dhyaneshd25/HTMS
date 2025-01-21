@@ -11,13 +11,13 @@ module.exports.add_patient = async(req,res)=>{
         let alldoccount = await patient.countDocuments()
         console.log(alldoccount)
         const hosp = await hospital.findOne();
-     
+        console.log(hosp._id);
         const doc =  await doctor.findOne({hos_id:hosp._id});
-       
+        console.log(doc);
         const sta = await staff.findOne({hos_id:hosp._id,doc_id:doc._id});
-
-        if(alldoccount>=shared.max_patient_no){
-          res.status(200).send({data:"Patient Limit reached..."});
+        console.log(sta._id);
+        if(alldoccount>doc.max_patient_number){
+          return res.status(200).send({data:"Patient Limit reached..."});
         }else{
         if(alldoccount==0){
           const pat = new patient({
@@ -43,10 +43,10 @@ module.exports.add_patient = async(req,res)=>{
         })
         await pat.save()
       }
-        res.status(200).send("Patient Successfully added...")
+        return res.status(200).send("Patient Successfully added...")
     } 
       }catch(err){
-        res.status(500).send(err)
+        return res.status(500).send(err)
       }
     
 }
