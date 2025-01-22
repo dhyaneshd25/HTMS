@@ -1,9 +1,6 @@
 const express=require("express")
 const mongoose = require('mongoose');
 const cors = require('cors')
-// const mysql = require('mysql')
-// const bodyParser = require('body-parser')
-// const bcryt = require('bcrypt')
 
 const app = express();
 
@@ -13,25 +10,6 @@ app.use(cors({
       credentials: true
 }))
 app.use(express.json())
-// app.use(bodyParser.json())
-// app.use(bodyParser.urlencoded({extended:true}))
-
-
-// const db = mysql.createConnection({
-//     host:"localhost",
-//     user:"root",
-//     password:"",
-//     database:"Hospital_Slots_Management_System"
-// })
-
-// db.connect((err)=>{
-//     if(err){
-//         console.log("failed to connect to database",err.message);
-//     }
-
-//     console.log("Successfully connected to database....")
-// })
-
 
 const mongoURI = 'mongodb://localhost:27017/hospitalTokens'
 
