@@ -48,6 +48,11 @@ export default function DoctorDashboard({ user, onLogout }) {
         } else {
             setNextToken(status[1]);
         }
+
+        const respp = await axios.get("http://localhost:2000/api/get-maxpatient")
+        const maxpdata = respp.data;
+
+        setMaxPatients(maxpdata.max_patient)
     }
 
     useEffect(() => {

@@ -19,7 +19,9 @@ const patientschema = new mongoose.Schema({
           },
         }
       },
-      status: { type: String, enum: ['active', 'missing','completed'], default: 'active' }
+      status: { type: String, enum: ['active', 'missing','completed'], default: 'active' },
+},{
+  timestamps : true
 })
 
 const patient = mongoose.model('Patient', patientschema);

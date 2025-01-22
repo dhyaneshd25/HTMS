@@ -12,8 +12,8 @@ export default function PatientDashboard({ user, onLogout }) {
   const [currentToken,setCurrentToken]=useState("N/A");
   const [nextToken,setNextToken]=useState("N/A");
   const [myAppointments, setMyAppointments] = useState([]);
+  const [max_patient,setMax_patient] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const totalTokens = 0;
   const { toast } = useToast()
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
@@ -43,6 +43,11 @@ export default function PatientDashboard({ user, onLogout }) {
      setNextToken("N/A");
     }else{
     setNextToken(status[1]);}
+
+    const respp = await axios.get("http://localhost:2000/api/get-maxpatient")
+        const maxpdata = respp.data;
+
+        setMax_patient(maxpdata.max_patient)
   }
 
   useEffect(() => {
@@ -56,6 +61,7 @@ export default function PatientDashboard({ user, onLogout }) {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
+    if(max_patient!=totaltokens){
     try {
       const response = await axios.post('http://localhost:2000/api/add-patient', data, {
          withCredentials: true
@@ -76,7 +82,15 @@ export default function PatientDashboard({ user, onLogout }) {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }else{
+    reset()
+    toast({
+      title: "Patient Limit !!!",
+      description: "Failed to submit appointment. Patient Limit Reached !!!",
+      variant: "destructive"
+   })
+  }
+};
 
 
   return (
