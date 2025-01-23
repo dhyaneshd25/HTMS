@@ -8,14 +8,12 @@ import Livedisplay from '../../components/ui/livedisplay';
 
 
 export default function PatientDashboard({ user, onLogout }) {
-  const [totaltokens,setTotaltokens]=useState(0);
+  const [totaltokens,setTotaltokens]=useState();
   const [currentToken,setCurrentToken]=useState("N/A");
   const [nextToken,setNextToken]=useState("N/A");
-  const [myAppointments, setMyAppointments] = useState([]);
+  const [maxPatient, setMaxPatients] = useState();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const totalTokens = 0;
   const { toast } = useToast()
-
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
   // useEffect(() => {
@@ -30,6 +28,26 @@ export default function PatientDashboard({ user, onLogout }) {
   //     console.error('Failed to fetch appointments:', error);
   //   }
   // };
+
+  const fetchPatientLimit = async () => {
+    const response = await axios.get("http://localhost:2000/api/get-maxpatient")
+    if (response.status === 200) {
+        setMaxPatients(response.data?.max_patient);
+        localStorage.setItem("max_patient", response.data?.max_patient);
+        console.log(response.data?.max_patient);
+    } else {
+        toast({
+            title: "Failed to fetch max patients.",
+            description: "Please try again later.",
+            variant: "destructive",
+            duration: 4000,
+        })
+     }
+   }
+
+    useEffect(() => {
+        fetchPatientLimit()
+    }, []);
 
   const fetchstatus = async()=>{
     const resp = await axios.get("http://localhost:2000/api/get-status")
@@ -48,19 +66,24 @@ export default function PatientDashboard({ user, onLogout }) {
   useEffect(() => {
     fetchstatus()
     const intervalId = setInterval(fetchstatus, 5000);
-
-
     return () => clearInterval(intervalId);
   },[]);
 
-
   const onSubmit = async (data) => {
+    if (totaltokens === maxPatient) {
+      toast({
+        title: "Error !!!",
+        description: "Patient Limit Reached. Please try again later. !!",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const response = await axios.post('http://localhost:2000/api/add-patient', data, {
          withCredentials: true
       });
-      console.log("Response", response);
       reset();
       toast({
          title: "Appointment Done !!!",
@@ -81,6 +104,7 @@ export default function PatientDashboard({ user, onLogout }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+       <Toaster />
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex justify-center items-center">
@@ -204,8 +228,6 @@ export default function PatientDashboard({ user, onLogout }) {
           </form>
         </div>
       </main>
-
-      <Toaster />
     </div>
   );
 }

@@ -3,6 +3,9 @@ import { ClipboardList, UserCheck, Settings, Users, Edit2, Check, X } from 'luci
 import axios from "axios";
 import Livedisplay from '../../components/ui/livedisplay';
 import Displaypatients from '../../components/displaypatients';
+import { useToast } from '../../hooks/use-toast';
+import { Toaster } from "../../Components/ui/toaster"
+
 
 export default function DoctorDashboard({ user, onLogout }) {
     const [maxPatients, setMaxPatients] = useState('');
@@ -13,7 +16,7 @@ export default function DoctorDashboard({ user, onLogout }) {
     const [nextToken, setNextToken] = useState("N/A");
     const [patients, setPatients] = useState([]);
     const [completedpatient, setCompletedpatient] = useState([]);
-    console.log(maxPatients);
+    const { toast } = useToast();
 
     const fetchTokens = async () => {
         const res = await axios.get("http://localhost:2000/api/get-all-patient")
@@ -50,8 +53,23 @@ export default function DoctorDashboard({ user, onLogout }) {
         }
     }
 
+    const fetchPatientLimit = async () => {
+        const response = await axios.get("http://localhost:2000/api/get-maxpatient")
+        if (response.status === 200) {
+            setMaxPatients(response.data?.max_patient);
+        } else {
+            toast({
+                title: "Failed to fetch max patients.",
+                description: "Please try again later.",
+                variant: "destructive",
+                duration: 4000,
+            })
+        }
+    }
+
     useEffect(() => {
         fetchTokens()
+        fetchPatientLimit()
         const intervalId = setInterval(fetchTokens, 5000);
         return () => clearInterval(intervalId);
     }, []);
@@ -80,15 +98,35 @@ export default function DoctorDashboard({ user, onLogout }) {
                     setMaxPatients(response.data?.data);
                     setIsEditing(false);
                     setEditValue('');
+                    toast({
+                        title: "Success !!!",
+                        description: "Maximun limit set successfully.",
+                        duration: 4000,
+                    })
                 } else {
-                    alert("Failed to update max patients.");
+                    toast({
+                        title: "Failed to update max patients.",
+                        description: "Please try again later.",
+                        variant: "destructive",
+                        duration: 4000,
+                    })
                 }
             } catch (error) {
                 console.error("Error updating max patients:", error);
-                alert("An error occurred while updating max patients.");
+                toast({
+                    title: "Error updating max patients.",
+                    description: "Please try again later.",
+                    variant: "destructive",
+                    duration: 4000,
+                })
             }
         } else {
-            alert("Please enter a valid positive number.");
+            toast({
+                title: "Error !!",
+                description: "Please enter a valid positive number.",
+                variant: "destructive",
+                duration: 4000,
+            })
         }
     };
 
@@ -157,6 +195,8 @@ export default function DoctorDashboard({ user, onLogout }) {
                 </div>
                 <Displaypatients patientlist={patients} width={"w-full"} />
             </main>
+
+            <Toaster />
         </div>
     );
 }
