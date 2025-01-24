@@ -11,7 +11,7 @@ app.use(cors({
 }))
 app.use(express.json())
 
-const mongoURI = 'mongodb://localhost:27017/hospitalTokens'
+const mongoURI = 'mongodb+srv://krushnasakhare965:Krushna123@cluster0.z5j76.mongodb.net/'
 
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connected to MongoDB'))

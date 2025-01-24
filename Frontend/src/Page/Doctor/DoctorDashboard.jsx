@@ -1,62 +1,54 @@
 import React, { useEffect, useState } from 'react';
-import { ClipboardList, UserCheck, Settings, Users, Edit2, Check, X } from 'lucide-react';
+import { Settings, Edit2, CalendarIcon } from 'lucide-react';
 import axios from "axios";
 import Livedisplay from '../../components/ui/livedisplay';
 import Displaypatients from '../../components/displaypatients';
+import { Calendar } from "../../components/ui/calendar";
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
+import { format } from "date-fns";
+
+
 
 export default function DoctorDashboard({ user, onLogout }) {
     const [maxPatients, setMaxPatients] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState('');
+    const [selectedDate, setSelectedDate] = useState(null);
     const [totaltokens, setTotaltokens] = useState(0);
     const [currentToken, setCurrentToken] = useState("N/A");
     const [nextToken, setNextToken] = useState("N/A");
     const [patients, setPatients] = useState([]);
     const [completedpatient, setCompletedpatient] = useState([]);
-    console.log(maxPatients);
+    const [startTime, setStartTime] = useState('00:00');
+    const [endTime, setEndTime] = useState('00:00');
+    const [patientsPerSlot, setPatientsPerSlot] = useState(0);
 
     const fetchTokens = async () => {
-        const res = await axios.get("http://localhost:2000/api/get-all-patient")
-
+        const res = await axios.get("http://localhost:2000/api/get-all-patient");
         if (res.data) {
-            const alldata = res.data;
-            const lsi = alldata.pateintlist
-            let templist = [];
-            lsi.map((p, i) => {
-                templist.push(p)
-            })
-            setPatients(templist)
-            templist = []
-            lsi.map((p, i) => {
-                if (p.status == "completed") {
-                    templist.push(p)
-                }
-            })
-            setCompletedpatient(templist)
+            const lsi = res.data.pateintlist;
+            setPatients(lsi);
+            setCompletedpatient(lsi.filter(p => p.status === "completed"));
         }
 
-        const resp = await axios.get("http://localhost:2000/api/get-status")
+        const resp = await axios.get("http://localhost:2000/api/get-status");
         const status = resp.data.statuslist;
-        setTotaltokens(status[2])
-        if (status[0] == -1) {
-            setCurrentToken("N/A")
-        } else {
-            setCurrentToken(status[0]);
-        }
-        if (status[1] == -1) {
-            setNextToken("N/A");
-        } else {
-            setNextToken(status[1]);
-        }
+        setTotaltokens(status[2]);
+        setCurrentToken(status[0] === -1 ? "N/A" : status[0]);
+        setNextToken(status[1] === -1 ? "N/A" : status[1]);
 
-        const respp = await axios.get("http://localhost:2000/api/get-maxpatient")
-        const maxpdata = respp.data;
-
-        setMaxPatients(maxpdata.max_patient)
-    }
+        const respp = await axios.get("http://localhost:2000/api/get-maxpatient");
+        setMaxPatients(respp.data.max_patient);
+    };
 
     useEffect(() => {
-        fetchTokens()
+        fetchTokens();
         const intervalId = setInterval(fetchTokens, 5000);
         return () => clearInterval(intervalId);
     }, []);
@@ -79,8 +71,6 @@ export default function DoctorDashboard({ user, onLogout }) {
                     "http://localhost:2000/api/set-patient-limit",
                     { max_patient: number }
                 );
-                console.log(response);
-
                 if (response.status === 200) {
                     setMaxPatients(response.data?.data);
                     setIsEditing(false);
@@ -110,54 +100,99 @@ export default function DoctorDashboard({ user, onLogout }) {
             <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
                 <Livedisplay current={currentToken} next={nextToken} total={totaltokens} />
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div className="px-6 py-2 border-b border-gray-200 flex items-center">
+                    <div className="px-6 py-4 border-b border-gray-200 flex items-center">
                         <Settings className="w-5 h-5 mr-2" />
                         <h2 className="text-xl font-semibold">Appointment Settings: </h2>
                     </div>
-                    <div className="p-4 px-6">
-                        <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-2">
-                                <span className="text-lg font-medium text-gray-700">
-                                    Maximum patients per day:
-                                </span>
-                                {isEditing ? (
-                                    <div className="flex items-center space-x-2">
-                                        <input
-                                            type="number"
-                                            value={editValue}
-                                            onChange={(e) => setEditValue(e.target.value)}
-                                            className="w-20 px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            min="1"
-                                        />
-                                        <button
-                                            onClick={handleSaveEdit}
-                                            className="p-1 px-2 bg-green-600 text-white font-medium rounded focus:outline-none hover:text-white"
-                                            title="Save"
-                                        >
-                                            Submit
-                                        </button>
-                                        <button
-                                            onClick={handleCancelEdit}
-                                            className="p-1 px-2 bg-red-600 text-white font-medium rounded hover:text-white focus:outline-none"
-                                            title="Cancel"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center space-x-2">
-                                        <span className="font-bold">{maxPatients || 0}</span>
-                                        <button
-                                            onClick={handleStartEdit}
-                                            className="p-1 text-gray-500 hover:text-blue-600 focus:outline-none"
-                                            title="Edit"
-                                        >
-                                            <Edit2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                )}
+                    <div className="p-4 px-5">
+                        
+                    <div className="bg-white rounded-lg overflow-hidden">
+                    <div className="p-3 py-1 space-y-5">
+                        
+                    {/* Date Selection */}
+                      <div className='w-full flex gap-10'>
+                        <div className="w-1/2 space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                                Select Date
+                            </label>
+                            <input
+                                type="date"
+                                // min={minDate}
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                                className="p-1 px-2 mt-1 w-full block rounded-md border border-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        {/* Slot Settings */}
+                        <div className="w-1/2">
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Patients Per Slot
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={patientsPerSlot}
+                                    onChange={(e) => setPatientsPerSlot(parseInt(e.target.value))}
+                                    className="p-1 px-2 mt-1 block w-full rounded-md border border-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
+                            </div>
+                            {/* <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Slot Duration (minutes)
+                                </label>
+                                <select
+                                    value={slotDuration}
+                                    onChange={(e) => setSlotDuration(parseInt(e.target.value))}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                >
+                                    <option value={15}>15 minutes</option>
+                                    <option value={30}>30 minutes</option>
+                                    <option value={45}>45 minutes</option>
+                                    <option value={60}>60 minutes</option>
+                                </select>
+                            </div> */}
+                        </div>
+                      </div>
+
+                        {/* Time Settings */}
+                        <div className="w-full flex gap-10">
+                            <div className="w-1/2 space-y-2">
+                                <label className="text-sm font-medium text-gray-700">
+                                    Start Time
+                                </label>
+                                <input
+                                    type="time"
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
+                                    className="p-1 px-2 mt-1 block w-full rounded-md border border-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
+                            </div>
+                            <div className="w-1/2 space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    End Time
+                                </label>
+                                <input
+                                    type="time"
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.target.value)}
+                                    className="p-1 px-2 border mt-1 block w-full rounded-md border-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
                             </div>
                         </div>
+
+                        {/* Save Button */}
+                        <div className="flex justify-start">
+                            <button
+                                // onClick={handleSaveAppointmentSettings}
+                                className="px-3 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            >
+                                Save Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
                     </div>
                 </div>
                 <Displaypatients patientlist={patients} width={"w-full"} />
