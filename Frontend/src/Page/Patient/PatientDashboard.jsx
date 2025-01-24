@@ -232,6 +232,32 @@ export default function PatientDashboard({ user, onLogout }) {
             </div>
 
             <div className='w-full flex gap-8'>
+              <div className='w-1/2'>
+                <label htmlFor="gender">Clinic</label>
+                <Select>
+                  <SelectTrigger className="mt-1 w-full border-gray-500 rounded-md p-2">
+                    <SelectValue placeholder="Select Clinic" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Clinic-1">Clinic 1</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className='w-1/2'>
+                <label htmlFor="doctor">Doctor</label>
+                <Select>
+                  <SelectTrigger className="mt-1 w-full border-gray-500 rounded-md p-2">
+                    <SelectValue placeholder="Select Doctor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Doctor 1</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className='w-full flex gap-8'>
               <div className='w-1/3'>
                 <label htmlFor="gender">Gender</label>
                 <Select>
@@ -253,7 +279,6 @@ export default function PatientDashboard({ user, onLogout }) {
                   placeholder="Appointment Date"
                   className="mt-1 w-full border border-gray-500 rounded-md p-2"
                 />
-                
               </div>
 
               <div className='w-1/3'>
@@ -282,6 +307,7 @@ export default function PatientDashboard({ user, onLogout }) {
                 <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
               )}
             </div>
+            
             <button
               type="submit"
               disabled={isSubmitting}
