@@ -1,12 +1,13 @@
 const {Router} = require('express')
 
-const {add_doctor,set_maxpatientnumber, get_all_doctors, get_maxpatient} = require('../controllers/doctorcontroller')
+const {add_doctor,add_slot, get_all_doctors, get_doctor_slots} = require('../controllers/doctorcontroller')
 
 const router = Router()
 
 router.post('/add-doctor',add_doctor)
-router.post('/set-patient-limit',set_maxpatientnumber)
-router.get('/get-alldocs',get_all_doctors)
-router.get('/get-maxpatient',get_maxpatient);
+router.post('/add-slot',add_slot)
+router.get('/get-alldoctors',get_all_doctors)
+router.get('/get-doctor-slots',get_doctor_slots)
+
 
 module.exports = router

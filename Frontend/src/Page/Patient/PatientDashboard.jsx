@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, FileText, Bell } from 'lucide-react';
+import { Clock, FileText, Bell, CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { Toaster } from "../../Components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
 import Livedisplay from '../../components/ui/livedisplay';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 
 export default function PatientDashboard({ user, onLogout }) {
@@ -32,22 +33,22 @@ export default function PatientDashboard({ user, onLogout }) {
   // };
 
   const fetchstatus = async()=>{
-    const resp = await axios.get("http://localhost:2000/api/get-status")
-    const status = resp.data.statuslist;
-    setTotaltokens(status[2])
-    if(status[0]==-1){
-      setCurrentToken("N/A")
-    }else{
-    setCurrentToken(status[0]);}
-    if(status[1]==-1){
-     setNextToken("N/A");
-    }else{
-    setNextToken(status[1]);}
+    // const resp = await axios.get("http://localhost:2000/api/get-status")
+    // const status = resp.data.statuslist;
+    // setTotaltokens(status[2])
+    // if(status[0]==-1){
+    //   setCurrentToken("N/A")
+    // }else{
+    // setCurrentToken(status[0]);}
+    // if(status[1]==-1){
+    //  setNextToken("N/A");
+    // }else{
+    // setNextToken(status[1]);}
 
-    const respp = await axios.get("http://localhost:2000/api/get-maxpatient")
-        const maxpdata = respp.data;
+    // const respp = await axios.get("http://localhost:2000/api/get-maxpatient")
+    //     const maxpdata = respp.data;
 
-        setMax_patient(maxpdata.max_patient)
+    //     setMax_patient(maxpdata.max_patient)
   }
 
   useEffect(() => {
@@ -60,10 +61,11 @@ export default function PatientDashboard({ user, onLogout }) {
 
 
   const onSubmit = async (data) => {
+    console.log(data)
     setIsSubmitting(true);
     if(max_patient!=totaltokens){
     try {
-      const response = await axios.post('http://localhost:2000/api/add-patient', data, {
+      const response = await axios.post('http://localhost:2001/api/add-patient', data, {
          withCredentials: true
       });
       console.log("Response", response);
@@ -155,41 +157,132 @@ export default function PatientDashboard({ user, onLogout }) {
 
         {/* Request Appointment Form */}
         <div className="bg-white rounded-lg shadow p-6 h-full overflow-y-auto">
-          <h2 className="text-xl font-semibold mb-6 flex items-center">
+          <div className="text-xl shadow-md pb-2 font-semibold mb-6 flex items-center">
             <FileText className="w-5 h-5 mr-2" />
             Request New Appointment
-          </h2>
+          </div>
+          
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Name</label>
-              <input
-                {...register("patient_name", { 
-                  required: "Name is required",
-                  minLength: { value: 2, message: "Name must be at least 2 characters" }
-                })}
-                className="p-2 mt-1 block w-full rounded-md border border-gray-300 shadow-sm"
-              />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-              )}
+            
+            <div className='flex gap-8'>
+              <div className='w-1/2'>
+                <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                <input
+                  {...register("patient_name", { 
+                    required: "Name is required",
+                    minLength: { value: 2, message: "Name must be at least 2 characters" }
+                  })}
+                  className="p-2 mt-1 w-full rounded-lg border border-gray-500 shadow-sm"
+                />
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                )}
+              </div>
+
+              <div className='w-1/2'>
+                <label className="block text-sm font-medium text-gray-700">Age</label>
+                <input type="number" min={0} max={100}
+                  className="p-2 mt-1 block w-full rounded-lg border border-gray-500 shadow-sm"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-              <input
-                type='number'
-                {...register("mobile_no", { 
-                  required: "Phone number is required",
-                  pattern: {
-                     value: /^[6-9]\d{9}$/,
-                     message: "Invalid Phone Number"
-                  }
-                })}
-                className="p-2 mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-              {errors.mobile_no && (
-                <p className="mt-1 text-sm text-red-600">{errors.mobile_no.message}</p>
-              )}
+            <div className='w-full flex gap-10'>
+              <div className='w-1/2'>
+                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                <input
+                  type='number'
+                  {...register("mobile_no", { 
+                    required: "Phone number is required",
+                    pattern: {
+                      value: /^[6-9]\d{9}$/,
+                      message: "Invalid Phone Number"
+                    }
+                  })}
+                  className="p-2 mt-1 block w-full rounded-md border border-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+                {errors.mobile_no && (
+                  <p className="mt-1 text-sm text-red-600">{errors.mobile_no.message}</p>
+                )}
+              </div>
+
+              <div className='w-1/2'>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type='email'
+                  {...register("email", { 
+                    required: "Phone number is required",
+                    pattern: {
+                      value: /^[6-9]\d{9}$/,
+                      message: "Invalid Phone Number"
+                    }
+                  })}
+                  className="p-2 mt-1 block w-full rounded-md border border-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+                {errors.mobile_no && (
+                  <p className="mt-1 text-sm text-red-600">{errors.mobile_no.message}</p>
+                )}
+              </div>
+            </div>
+
+            <div className='w-full flex gap-8'>
+              <div className='w-1/2'>
+                <label htmlFor="gender">Clinic</label>
+                <Select>
+                  <SelectTrigger className="mt-1 w-full border-gray-500 rounded-md p-2">
+                    <SelectValue placeholder="Select Clinic" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Clinic-1">Clinic 1</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className='w-1/2'>
+                <label htmlFor="doctor">Doctor</label>
+                <Select>
+                  <SelectTrigger className="mt-1 w-full border-gray-500 rounded-md p-2">
+                    <SelectValue placeholder="Select Doctor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Doctor 1</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className='w-full flex gap-8'>
+              <div className='w-1/3'>
+                <label htmlFor="gender">Gender</label>
+                <Select>
+                  <SelectTrigger className="mt-1 w-full border-gray-500 rounded-md p-2">
+                    <SelectValue placeholder="Gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="w-1/3">
+                <label htmlFor="Date">Appointment Date</label>
+                <input
+                  type="date"
+                  placeholder="Appointment Date"
+                  className="mt-1 w-full border border-gray-500 rounded-md p-2"
+                />
+              </div>
+
+              <div className='w-1/3'>
+                <label htmlFor="Time">Appointment Time</label>
+                <input 
+                  type="time" 
+                  placeholder="Appointment Time" 
+                  className="mt-1 w-full border border-gray-500 rounded-md p-2" 
+                />
+                </div>
             </div>
 
             <div>
@@ -202,12 +295,13 @@ export default function PatientDashboard({ user, onLogout }) {
                   minLength: { value: 10, message: "Description must be at least 10 characters" }
                 })}
                 rows={4}
-                className="p-2 mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="p-2 mt-1 block w-full rounded-md border border-gray-500 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
               {errors.description && (
                 <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
               )}
             </div>
+            
             <button
               type="submit"
               disabled={isSubmitting}

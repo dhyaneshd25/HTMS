@@ -1,5 +1,4 @@
 const express=require("express")
-// const mongoose = require('mongoose');
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const app = express();
@@ -24,12 +23,12 @@ app.listen(PORT, () => {
 
 const hospital_router = require('./routes/hospitalroute')
 const clinic_router = require('./routes/clinicroute')
-// const doctor_router = require('./routes/doctorroute')
-// const staff_router = require('./routes/staffroute')
-// const patient_router = require('./routes/patientroute')
+const doctor_router = require('./routes/doctorroute')
+const receptionist_router = require('./routes/receptionistroute')
+const patient_router = require('./routes/patientroute')
 
 app.use('/api',hospital_router);
 app.use('/api',clinic_router);
-// app.use('/api',doctor_router);
-// app.use('/api',staff_router);
-// app.use('/api',patient_router);
+app.use('/api',doctor_router);
+app.use('/api',receptionist_router);
+app.use('/api',patient_router);

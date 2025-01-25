@@ -16,7 +16,7 @@ export default function ReceptionistDashboard({ user, onLogout }) {
   const [completedpatient,setCompletedpatient]=useState([])
   
   const fetchTokens = async () => {
-    const res = await axios.get("http://localhost:2000/api/get-all-patient")
+    const res = await axios.get("http://localhost:2001/api/get-all-patient")
 
     if (res.data) {
      const alldata = res.data;
@@ -42,7 +42,7 @@ export default function ReceptionistDashboard({ user, onLogout }) {
        setCompletedpatient(templist)
     }
 
-    const resp = await axios.get("http://localhost:2000/api/get-status")
+    const resp = await axios.get("http://localhost:2001/api/get-status")
     const status = resp.data.statuslist;
     setTotaltokens(status[2])
     if(status[0]==-1){
@@ -62,7 +62,7 @@ export default function ReceptionistDashboard({ user, onLogout }) {
    }
    console.log(data)
    try{
-    const res = await axios.post("http://localhost:2000/api/recall",data,{ withCredentials: true})
+    const res = await axios.post("http://localhost:2001/api/recall",data,{ withCredentials: true})
  
      toast({
        title: "Appointment Missed !!!",
@@ -80,7 +80,7 @@ export default function ReceptionistDashboard({ user, onLogout }) {
     const data = {
      token_no : currentToken
     }
-   const res = await axios.post("http://localhost:2000/api/mark-completed",data,{ withCredentials: true})
+   const res = await axios.post("http://localhost:2001/api/mark-completed",data,{ withCredentials: true})
 
    try{
     toast({
@@ -101,7 +101,7 @@ export default function ReceptionistDashboard({ user, onLogout }) {
        token_no : currentToken
       }
       try{
-     const res = await axios.post("http://localhost:2000/api/mark-miss",data,{ withCredentials: true})
+     const res = await axios.post("http://localhost:2001/api/mark-miss",data,{ withCredentials: true})
   
       toast({
         title: "Appointment Missed !!!",

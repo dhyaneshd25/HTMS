@@ -1,50 +1,35 @@
-const hospital = require('../models/hospitalmodel')
-const doctor = require('../models/doctormodel')
-const staff = require('../models/staffmodel')
-const patient = require('../models/patientmodel')
-const shared = require('../shareds/share')
+const db = require('../utils/db')
 
 module.exports.add_patient = async(req,res)=>{
     try{
-        const {patient_name,patient_desc,mobile_no} = await req.body;
+      const {name,num,desc,doctor_id,clinic_id,slot_id,age,gender,date,email} =req.body;
+      const checkquery = `select count(*) from patient where date=? and slot_id=? and doctor_id=?`
+      db.query(checkquery,[date,slot_id,doctor_id],(err,result)=>{
+        if(err){
+          return res.status(400).send(err);
+        }
+        const countpatient = result[0]['count(*)'];
         
-        let alldoccount = await patient.countDocuments()
-        console.log(alldoccount)
-        const hosp = await hospital.findOne();
-        console.log(hosp._id);
-        const doc =  await doctor.findOne({hos_id:hosp._id});
-        console.log(doc);
-        const sta = await staff.findOne({hos_id:hosp._id,doc_id:doc._id});
-        console.log(sta._id);
-        if(alldoccount>doc.max_patient_number){
-          return res.status(200).send({data:"Patient Limit reached..."});
-        }else{
-        if(alldoccount==0){
-          const pat = new patient({
-            hos_id:hosp._id,
-            doc_id:doc._id,
-            staff_id:sta._id,
-            mobile_no:mobile_no,
-            patient_name:patient_name,
-            patient_desc:patient_desc,
-            token_number:1
+        const nextcheck = `select max_patient from slots where slot_date=?  and slot_id=? and doctor_id=?`
+        db.query(nextcheck,[date,slot_id,doctor_id],(err,result1)=>{
+          if(err){
+            return res.status(400).send(err);
+          }
+          const maxpatient = result1[0]['max_patient']
+          if(countpatient>=maxpatient){
+            return res.status(400).send({message:"Patient Limit reached for slot"})
+          }
+        let tokennumber=  countpatient+1;
+          const insertpatient = `insert into patient (patient_name,contact_number,description,slot_id,token_number,age,gender,date,doctor_id,clinic_id,email) values(?,?,?,?,?,?,?,?,?,?,?)`
+          db.query(insertpatient,[name,num,desc,slot_id,tokennumber,age,gender,date,doctor_id,clinic_id,email],(err,result2)=>{
+            if(err){
+              return res.status(400).send(err)
+            }
+            return res.status(200).json({message:result2.insertId})
           })
-          await pat.save()
-        }else{
-          alldoccount++;
-         const pat = new patient({
-          hos_id:hosp._id,
-          doc_id:doc._id,
-          staff_id:sta._id,
-          mobile_no:mobile_no,
-          patient_name:patient_name,
-          patient_desc:patient_desc,
-          token_number:alldoccount
         })
-        await pat.save()
-      }
-        return res.status(200).send("Patient Successfully added...")
-    } 
+
+      })
       }catch(err){
         return res.status(500).send(err)
       }
@@ -53,8 +38,10 @@ module.exports.add_patient = async(req,res)=>{
 
 module.exports.get_all_patients = async(req,res)=>{
   try{
-    const allpatient  = await patient.find();
-    res.status(200).send({pateintlist : allpatient})
+    db.query('select * from patient',(err,results)=>{
+      if(err) return res.status(400).send(err);
+      return res.status(200).json({allpatients:results})
+    })
   }catch(err){
     res.status(500).send(err)
   }
@@ -62,21 +49,52 @@ module.exports.get_all_patients = async(req,res)=>{
 
 module.exports.get_status = async(req,res)=>{
   try{
-    const totalpatientcount = await patient.countDocuments();
-    if(totalpatientcount==0){
-        return res.status(200).send({statuslist:[-1,-1,0]})
-    }else{
-      const activecount =await patient.countDocuments({status:"active"})
-      if(activecount==1){
-        const allactivepatient =  await patient.find({status:"active"})
-        return res.status(200).send({statuslist:[allactivepatient[0].token_number,-1,totalpatientcount]})
-      }else if(activecount==0){
-        return res.status(200).send({statuslist:[-1,-1,totalpatientcount]})
-      }else{
-        const allactivepatient = await patient.find({status:"active"})
-        return res.status(200).send({statuslist:[allactivepatient[0].token_number,allactivepatient[1].token_number,totalpatientcount]})
-      }
+   const {doctor_id,date,slot_id}  = req.body;
+   const query = `select count(*) from patient where date=? and slot_id=? and doctor_id=?`
+   db.query(query,[date,slot_id,doctor_id],(err,result)=>{
+    if(err){
+      return res.status(400).send(err);
     }
+     if(result[0]['count(*)']>0){
+     const allpatient = `select * from patient where date=?  and slot_id=? and doctor_id=?`
+     db.query(allpatient,[date,slot_id,doctor_id],(err,result1)=>{
+      if(err){
+        return res.status(400).send(err);
+      }
+      let status = 'active'
+      const activepatientcount = `select count(*) from patient where status=? and date=?  and slot_id=? and doctor_id=?`
+      db.query(activepatientcount,[status,date,slot_id,doctor_id],(err,result3)=>{
+        if(err){
+          return res.status(400).send(err);
+        }
+        if(result3[0]['count(*)']>0){
+          const activepatients = `select * from patient where status=? and date=? and slot_id=? and doctor_id=?`
+      
+          if(result3[0]['count(*)']==1){
+               db.query(activepatients,[status,date,slot_id,doctor_id],(err,result4)=>{
+                if(err){
+                  return res.status(400).send(err);
+                }
+                return res.status(200).json({statuslist:[result4[0],null]});
+               })
+          }else{
+            db.query(activepatients,[status,date,slot_id,doctor_id],(err,result4)=>{
+              if(err){
+                return res.status(400).send(err);
+              }
+              return res.status(200).json({statuslist:[result4[0],result4[1]]});
+             })
+          }
+
+        }else{
+          return res.status(200).json({statuslist:[null,null]});
+        }
+      })
+     })
+  }else{
+       return res.status(200).json({statuslist:[null,null]});
+  }
+})
   }catch(err){
     return res.status(500).send(err);
   }
@@ -84,8 +102,22 @@ module.exports.get_status = async(req,res)=>{
 
 module.exports.deleteAllpatients = async(req,res) =>{
   try{
-    await patient.deleteMany();
-    res.status(200).send("All patient deleted....")
+    db.query('truncate table patient',(err,result)=>{
+      if(err){
+        return res.status(400).send(err);
+      }
+      res.status(200).send("suceessfully deleted all patient....")
+    })
+  }catch(err){
+    res.status(500).send(err)
+  }
+}
+
+module.exports.get_patient_clinic_doctor = async(req,res)=>{
+  try{
+
+    const {clinic_id,doctor_id} = req.body
+
   }catch(err){
     res.status(500).send(err)
   }
