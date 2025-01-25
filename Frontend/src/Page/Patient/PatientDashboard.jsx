@@ -9,14 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 
 export default function PatientDashboard({ user, onLogout }) {
-  const [totaltokens,setTotaltokens]=useState(0);
+  const [totaltokens,setTotaltokens]=useState();
   const [currentToken,setCurrentToken]=useState("N/A");
   const [nextToken,setNextToken]=useState("N/A");
   const [myAppointments, setMyAppointments] = useState([]);
-  const [max_patient,setMax_patient] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast()
-
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
   // useEffect(() => {
@@ -31,6 +29,26 @@ export default function PatientDashboard({ user, onLogout }) {
   //     console.error('Failed to fetch appointments:', error);
   //   }
   // };
+
+  const fetchPatientLimit = async () => {
+    const response = await axios.get("http://localhost:2000/api/get-maxpatient")
+    if (response.status === 200) {
+        setMaxPatients(response.data?.max_patient);
+        localStorage.setItem("max_patient", response.data?.max_patient);
+        console.log(response.data?.max_patient);
+    } else {
+        toast({
+            title: "Failed to fetch max patients.",
+            description: "Please try again later.",
+            variant: "destructive",
+            duration: 4000,
+        })
+     }
+   }
+
+    useEffect(() => {
+        fetchPatientLimit()
+    }, []);
 
   const fetchstatus = async()=>{
     // const resp = await axios.get("http://localhost:2000/api/get-status")
@@ -54,21 +72,16 @@ export default function PatientDashboard({ user, onLogout }) {
   useEffect(() => {
     fetchstatus()
     const intervalId = setInterval(fetchstatus, 5000);
-
-
     return () => clearInterval(intervalId);
   },[]);
 
-
   const onSubmit = async (data) => {
-    console.log(data)
     setIsSubmitting(true);
     if(max_patient!=totaltokens){
     try {
       const response = await axios.post('http://localhost:2001/api/add-patient', data, {
          withCredentials: true
       });
-      console.log("Response", response);
       reset();
       toast({
          title: "Appointment Done !!!",
@@ -97,6 +110,7 @@ export default function PatientDashboard({ user, onLogout }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+       <Toaster />
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex justify-center items-center">
@@ -312,8 +326,6 @@ export default function PatientDashboard({ user, onLogout }) {
           </form>
         </div>
       </main>
-
-      <Toaster />
     </div>
   );
 }
