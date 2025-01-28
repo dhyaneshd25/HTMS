@@ -1,9 +1,10 @@
 const db = require('../utils/db')
+const bcrypt = require('bcrypt')
 
 module.exports.add_receptionist = async(req,res)=>{
   try {
     const { name,clinic_id,hospital_id, doctor_id,username, password } = req.body;
-
+    const hashedPassword = await bcrypt.hash(password, 10);
     // Check if the username already exists
     const checkUsername = `SELECT * FROM receptionist WHERE username = ?`;
     db.query(checkUsername, [username], (err, results) => {
@@ -17,7 +18,7 @@ module.exports.add_receptionist = async(req,res)=>{
 
         // Insert the receptionist only if the username is unique
         const inserthos = `INSERT INTO receptionist (receptionist_name,clinic_id,doctor_id,hospital_id, username, password) VALUES (?, ?,?,?,?, ?)`;
-        db.query(inserthos, [name, clinic_id,doctor_id,hospital_id,username, password], (err, result) => {
+        db.query(inserthos, [name, clinic_id,doctor_id,hospital_id,username, hashedPassword], (err, result) => {
             if (err) {
                 return res.status(400).send(err);
             }
@@ -34,15 +35,15 @@ module.exports.add_receptionist = async(req,res)=>{
 
 module.exports.mark_missing =  async(req,res)=>{
   try{
-      const {patient_id} = req.body;
-      const allactivecount = 'select count(*) from patient where status="active"'
-      db.query(allactivecount,[],(err,result)=>{
+      const {patient_id,slot_id} = req.query;
+      const allactivecount = 'select count(*) from patient where status="active" and slot_id=?'
+      db.query(allactivecount,[slot_id],(err,result)=>{
         if(err){
           return res.status(400).send(err);
         }
         if(result[0]['count(*)']>0){
-             const updatequery = `update patient set status="missied" where `
-             db.query(updatequery,[],(err,results)=>{
+             const updatequery = `update patient set status="missed" where patient_id=? and slot_id=?`
+             db.query(updatequery,[patient_id,slot_id],(err,results)=>{
               if(err){
                 return res.status(400).send(err);
               }
@@ -58,29 +59,65 @@ module.exports.mark_missing =  async(req,res)=>{
 
 module.exports.mark_completed = async(req,res) =>{
   try{
-      // const {token_no} = req.body;
-      // const pat = await patient.findOne({token_number:token_no})
-      // pat.status = 'completed'
-      // await pat.save()
-      res.status(200).send("Patient Marked as missied.....")
+    
+    const {patient_id,slot_id} = req.query;
+    const allactivecount = 'select count(*) from patient where status="active" and slot_id=?'
+    db.query(allactivecount,[slot_id],(err,result)=>{
+      if(err){
+        return res.status(400).send(err);
+      }
+      if(result[0]['count(*)']>0){
+           const updatequery = `update patient set status="completed" where patient_id=? and slot_id=?`
+           db.query(updatequery,[patient_id,slot_id],(err,results)=>{
+            if(err){
+              return res.status(400).send(err);
+            }
+            return res.status(200).send("marked completed...");
+           })
+      }
+    })
+
   }catch(err){
-    res.status(500).send(err)
+    return res.status(500).send(err)
   }
 }
 
 module.exports.recall_patient = async(req,res) =>{
   try{
-    // const countmissing = await patient.countDocuments({status:"missing"})
-    // if(countmissing>0){
-    // const {token_no} = req.body;
-    // const pat = await patient.findOne({token_number:token_no,status:"missing"})
-    // pat.status = 'active'
-    // await pat.save()
-    return res.status(200).send("Patient recalled.....")
-    // }else{
-    //   return res.status(200).send("No missing patients")
-    // }
+    const {patient_id,slot_id} = req.query;
+    const allactivecount = 'select count(*) from patient where status="missed" and slot_id=?'
+    db.query(allactivecount,[slot_id],(err,result)=>{
+      if(err){
+        return res.status(400).send(err);
+      }
+      if(result[0]['count(*)']>0){
+           const updatequery = `update patient set status="active" where patient_id=? and slot_id=?`
+           db.query(updatequery,[patient_id,slot_id],(err,results)=>{
+            if(err){
+              return res.status(400).send(err);
+            }
+            return res.status(200).send("marked active...");
+           })
+      }
+    })
   }catch(err){
     return res.status(500).send(err)
+  }
+}
+
+
+module.exports.gettodayslots = async(req,res)=>{
+  try {
+    const {date} = req.query;
+    const findq = `select * from slots where slot_date=? and status='available'`;
+
+    db.query(findq,[date],(err,result)=>{
+      if(err){
+        return res.status(400).send(err);
+      }
+      return  res.status(200).json({slot:result});
+    })
+  } catch (error) {
+    return res.status(500).send(error)
   }
 }

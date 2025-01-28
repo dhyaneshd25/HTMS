@@ -16,6 +16,9 @@ const Displaypatients =({patientlist, width})=>{
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                <th className="px-6 py-3 text-left text-base font-medium text-gray-800 uppercase tracking-wider">
+                    Slot_id
+                  </th>
                   <th className="px-6 py-3 text-left text-base font-medium text-gray-800 uppercase tracking-wider">
                     Token
                   </th>
@@ -35,6 +38,9 @@ const Displaypatients =({patientlist, width})=>{
                   <tr key={index}
                     className={index % 2 == 0 ? "bg-gray-100" : ""}
                   >
+                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-750">
+                      #{patient.slot_id}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-750">
                       #{patient.token_number}
                     </td>
@@ -42,7 +48,7 @@ const Displaypatients =({patientlist, width})=>{
                       {patient.patient_name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-750">
-                      {patient.patient_desc}
+                      {patient.description}
                     </td>
                     <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${patient.status === 'active' ? "text-yellow-500" : "text-gray-750"} ${patient.status === 'missing' ? "text-red-600" : "text-gray-750"} ${patient.status === 'completed' ? "text-green-600" : "text-gray-750"}`}>
                       {patient.status}

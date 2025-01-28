@@ -10,8 +10,8 @@ module.exports.add_patient = async(req,res)=>{
         }
         const countpatient = result[0]['count(*)'];
         
-        const nextcheck = `select max_patient from slots where slot_date=?  and slot_id=? and doctor_id=?`
-        db.query(nextcheck,[date,slot_id,doctor_id],(err,result1)=>{
+        const nextcheck = `select max_patient from slots where  slot_id=? and doctor_id=?`
+        db.query(nextcheck,[slot_id,doctor_id],(err,result1)=>{
           if(err){
             return res.status(400).send(err);
           }
@@ -49,51 +49,34 @@ module.exports.get_all_patients = async(req,res)=>{
 
 module.exports.get_status = async(req,res)=>{
   try{
-   const {doctor_id,date,slot_id}  = req.body;
-   const query = `select count(*) from patient where date=? and slot_id=? and doctor_id=?`
-   db.query(query,[date,slot_id,doctor_id],(err,result)=>{
+   const {slot_id}  = req.query;
+   let status = 'active'
+   const query = `select count(*) from patient where status=? and slot_id=?`
+   db.query(query,[status,slot_id],(err,result3)=>{
     if(err){
       return res.status(400).send(err);
     }
-     if(result[0]['count(*)']>0){
-     const allpatient = `select * from patient where date=?  and slot_id=? and doctor_id=?`
-     db.query(allpatient,[date,slot_id,doctor_id],(err,result1)=>{
-      if(err){
-        return res.status(400).send(err);
-      }
-      let status = 'active'
-      const activepatientcount = `select count(*) from patient where status=? and date=?  and slot_id=? and doctor_id=?`
-      db.query(activepatientcount,[status,date,slot_id,doctor_id],(err,result3)=>{
-        if(err){
-          return res.status(400).send(err);
-        }
-        if(result3[0]['count(*)']>0){
-          const activepatients = `select * from patient where status=? and date=? and slot_id=? and doctor_id=?`
-      
-          if(result3[0]['count(*)']==1){
-               db.query(activepatients,[status,date,slot_id,doctor_id],(err,result4)=>{
+      if(result3[0]['count(*)']>0){
+            const allactivepatient = `select * from patient where status=? and slot_id=?`
+             if(result3[0]['count(*)']==1){
+               db.query(allactivepatient,[status,slot_id],(err,result)=>{
                 if(err){
                   return res.status(400).send(err);
                 }
-                return res.status(200).json({statuslist:[result4[0],null]});
+                return res.status(200).json({statuslist:[result[0]]})
                })
-          }else{
-            db.query(activepatients,[status,date,slot_id,doctor_id],(err,result4)=>{
-              if(err){
-                return res.status(400).send(err);
-              }
-              return res.status(200).json({statuslist:[result4[0],result4[1]]});
-             })
-          }
-
-        }else{
-          return res.status(200).json({statuslist:[null,null]});
-        }
-      })
-     })
-  }else{
-       return res.status(200).json({statuslist:[null,null]});
-  }
+              
+             }else{
+              db.query(allactivepatient,[status,slot_id],(err,result)=>{
+                if(err){
+                  return res.status(400).send(err);
+                }
+                return res.status(200).json({statuslist:[result[0],result[1]]})
+               })
+             }
+      }else{
+        return res.status(200).json({statuslist:[]})
+      }
 })
   }catch(err){
     return res.status(500).send(err);
@@ -122,3 +105,48 @@ module.exports.get_patient_clinic_doctor = async(req,res)=>{
     res.status(500).send(err)
   }
 }
+
+
+module.exports.getPatient_receptionist =  async(req,res)=>{
+  try{
+    const {receptionist_id} = req.query;
+    const findquery =`select patient_id,token_number,slot_id,patient_name,description,status,email,contact_number,age,gender from patient as p left  join receptionist as r on p.doctor_id = r.doctor_id where r.receptionist_id=?`
+
+    db.query(findquery,[receptionist_id],(err,result)=>{
+      if(err){
+        return res.status(400).send(err);
+      }
+
+      return res.status(200).json({all_recep_patient:result})
+    })
+  }catch(err){
+    return res.status(500).send(err);
+  }
+}
+
+module.exports.getslotmaxtotalpatient = async(req,res)=>{
+  try {
+    const {slot_id}  = req.query;
+    const query =  `select max_patient from slots where slot_id = ?`
+    db.query(query,[slot_id],(err,result)=>{
+      if(err){
+        return res.status(400).send(err);
+      }
+      
+      const countp = `select count(*) from patient where slot_id=?`;
+
+      db.query(countp,[slot_id],(err,result1)=>{
+        if(err){
+          return res.status(400).send(err);
+        }
+        const countpatient = result1[0]['count(*)']
+        return res.status(200).json({maxp:result,curco:countpatient});
+      })
+    })
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+}
+
+
+

@@ -9,7 +9,10 @@ const Displayslots = ({patientlist}) =>{
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-				  <th className="px-6 py-3 text-left text-base font-medium text-gray-800 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-base font-medium text-gray-800 uppercase tracking-wider">
+                    Slot ID.
+                  </th>
+				          <th className="px-6 py-3 text-left text-base font-medium text-gray-800 uppercase tracking-wider">
                     Slot No.
                   </th>
                   <th className="px-6 py-3 text-left text-base font-medium text-gray-800 uppercase tracking-wider">
@@ -31,8 +34,11 @@ const Displayslots = ({patientlist}) =>{
                   <tr key={index}
                     className={index % 2 == 0 ? "bg-gray-100" : ""}
                   >
-					<td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-750">
-                      {index+1}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-750">
+                      {patient.slot_id}
+                    </td>
+					          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-750">
+                      {patient.slot_number}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-750">
                       {patient.slot_date}

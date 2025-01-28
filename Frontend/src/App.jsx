@@ -13,6 +13,8 @@ function App() {
       <Routes>
         <Route>
          <Route path="/patient" element={<PatientDashboard />} />
+         
+         {/* <Route path="/patient" element={<Patient />} /> */}
           <Route path="/doctor" element={<DoctorDashboard />} />
           <Route path="/receptionist" element={<ReceptionistDashboard />} />
        </Route>

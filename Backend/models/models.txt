@@ -1,0 +1,78 @@
+CREATE TABLE hospital (  
+hospital_id BIGINT AUTO_INCREMENT PRIMARY KEY,  
+hospital_name VARCHAR(255) NOT NULL,  
+username VARCHAR(255) NOT NULL UNIQUE,  
+password VARCHAR(255) NOT NULL
+);
+
+
+
+CREATE TABLE clinic (
+  clinic_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  clinic_name VARCHAR(100) NOT NULL,
+  schedule_days INT NOT NULL,
+  hospital_id BIGINT NOT NULL,
+  type INT DEFAULT 0,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id) ON DELETE CASCADE
+);
+
+
+
+CREATE TABLE doctor (
+  doctor_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  doctor_name VARCHAR(50) NOT NULL,
+  clinic_id BIGINT NOT NULL,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON DELETE CASCADE
+);
+
+CREATE TABLE receptionist (
+  receptionist_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  receptionist_name VARCHAR(50) NOT NULL,
+  clinic_id BIGINT NOT NULL,
+  doctor_id BIGINT NOT NULL,
+  hospital_id BIGINT NOT NULL,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON DELETE CASCADE,
+  FOREIGN KEY (doctor_id) REFERENCES doctor(doctor_id) ON DELETE CASCADE,
+  FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE slots( 
+slot_id BIGINT AUTO_INCREMENT PRIMARY KEY,  
+clinic_id BIGINT NOT NULL,  
+doctor_id BIGINT NOT NULL,  
+slot_date DATE NOT NULL,  
+start_time TIME NOT NULL,  
+end_time TIME NOT NULL,  
+max_patient INT NOT NULL, 
+slot_number BIGINT DEFAULT NULL, 
+status ENUM('available','current','completed') DEFAULT 'available', 
+FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON DELETE CASCADE,  
+FOREIGN KEY (doctor_id) REFERENCES doctor(doctor_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE patient(
+  patient_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  patient_name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) DEFAULT NULL,
+  description VARCHAR(255) DEFAULT NULL,
+  status ENUM('active', 'completed', 'missed') DEFAULT 'active',
+  slot_id BIGINT NOT NULL,
+  age INT DEFAULT NULL,
+  gender VARCHAR(6) DEFAULT NULL,
+  doctor_id BIGINT DEFAULT NULL,
+  clinic_id BIGINT DEFAULT NULL,
+  token_number INT DEFAULT NULL,
+  date DATE DEFAULT NULL,
+  contact_number BIGINT DEFAULT NULL,
+  FOREIGN KEY (slot_id) REFERENCES slots(slot_id) ON DELETE CASCADE,
+  FOREIGN KEY (doctor_id) REFERENCES doctor(doctor_id) ON DELETE CASCADE,
+  FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON DELETE CASCADE
+);

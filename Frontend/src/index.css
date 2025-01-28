@@ -24,6 +24,13 @@
 }
 
 
+.react-datepicker__day--highlighted {
+  background-color: #ffeb3b;
+  color: #000;
+  border-radius: 50%;
+}
+
+
 .timer-padding {
    padding: 10px 10px;
 }

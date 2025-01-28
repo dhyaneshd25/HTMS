@@ -4,7 +4,8 @@ const bcrypt = require('bcrypt')
 module.exports.add_hospital= async(req,res)=>{
     try {
         const { name, username, password } = req.body;
-    
+        
+        const hashedPassword = await bcrypt.hash(password, 10);
         // Check if the username already exists
         const checkUsername = `SELECT * FROM hospital WHERE username = ?`;
         db.query(checkUsername, [username], (err, results) => {
@@ -18,7 +19,7 @@ module.exports.add_hospital= async(req,res)=>{
     
             // Insert the hospital only if the username is unique
             const inserthos = `INSERT INTO hospital (hospital_name, username, password) VALUES (?, ?, ?)`;
-            db.query(inserthos, [name,  username, password], (err, result) => {
+            db.query(inserthos, [name,  username, hashedPassword], (err, result) => {
                 if (err) {
                     return res.status(400).send(err);
                 }

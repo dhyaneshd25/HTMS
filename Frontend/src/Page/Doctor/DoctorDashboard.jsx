@@ -428,7 +428,7 @@ setSlots([]);
 					</div>
 				</div>
 				{doctorslot.length>0 && <Displayslots patientlist={doctorslot}/>}
-				<Displaypatients patientlist={patients} width={"w-full"} />
+				{/* <Displaypatients patientlist={patients} width={"w-full"} /> */}
 			</main>
 
 			<Toaster />
