@@ -1,4 +1,4 @@
-CREATE TABLE hospital (  
+CREATE TABLE IF NOT EXISTS hospital (  
 hospital_id BIGINT AUTO_INCREMENT PRIMARY KEY,  
 hospital_name VARCHAR(255) NOT NULL,  
 username VARCHAR(255) NOT NULL UNIQUE,  
@@ -7,7 +7,7 @@ password VARCHAR(255) NOT NULL
 
 
 
-CREATE TABLE clinic (
+CREATE TABLE IF NOT EXISTS clinic (
   clinic_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   clinic_name VARCHAR(100) NOT NULL,
   schedule_days INT NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE clinic (
 
 
 
-CREATE TABLE doctor (
+CREATE TABLE IF NOT EXISTS doctor (
   doctor_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   doctor_name VARCHAR(50) NOT NULL,
   clinic_id BIGINT NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE doctor (
   FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON DELETE CASCADE
 );
 
-CREATE TABLE receptionist (
+CREATE TABLE IF NOT EXISTS receptionist (
   receptionist_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   receptionist_name VARCHAR(50) NOT NULL,
   clinic_id BIGINT NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE receptionist (
 );
 
 
-CREATE TABLE slots( 
+CREATE TABLE IF NOT EXISTS slots( 
 slot_id BIGINT AUTO_INCREMENT PRIMARY KEY,  
 clinic_id BIGINT NOT NULL,  
 doctor_id BIGINT NOT NULL,  
@@ -58,7 +58,7 @@ FOREIGN KEY (doctor_id) REFERENCES doctor(doctor_id) ON DELETE CASCADE
 );
 
 
-CREATE TABLE patient(
+CREATE TABLE IF NOT EXISTS patient(
   patient_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   patient_name VARCHAR(100) NOT NULL,
   email VARCHAR(100) DEFAULT NULL,
