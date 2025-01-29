@@ -109,7 +109,7 @@ module.exports.recall_patient = async(req,res) =>{
 module.exports.gettodayslots = async(req,res)=>{
   try {
     const {date} = req.query;
-    const findq = `select * from slots where slot_date=? and status='available'`;
+    const findq = `select * from slots where slot_date=? and status in ('available','current')`;
 
     db.query(findq,[date],(err,result)=>{
       if(err){
@@ -117,6 +117,42 @@ module.exports.gettodayslots = async(req,res)=>{
       }
       return  res.status(200).json({slot:result});
     })
+  } catch (error) {
+    return res.status(500).send(error)
+  }
+}
+
+
+module.exports.updatecomplete = async(req,res)=>{
+  try {
+     const {slotid} = req.query;
+
+     const updatequery = `update slots set status="completed" where slot_id=?`
+
+     db.query(updatequery,[slotid],(err,result)=>{
+      if(err){
+        return res.status(400).send(err);
+      }
+      return res.status(200).send("update slot status to completed......")
+     })
+  } catch (error) {
+    return res.status(500).send(error)
+  }
+}
+
+
+module.exports.updatecurrent = async(req,res)=>{
+  try {
+    const {slotid} = req.query;
+
+     const updatequery = `update slots set status="current" where slot_id=?`
+
+     db.query(updatequery,[slotid],(err,result)=>{
+      if(err){
+        return res.status(400).send(err);
+      }
+      return res.status(200).send("update slot status to completed......")
+     })
   } catch (error) {
     return res.status(500).send(error)
   }

@@ -50,6 +50,11 @@ module.exports.get_all_patients = async(req,res)=>{
 module.exports.get_status = async(req,res)=>{
   try{
    const {slot_id}  = req.query;
+
+   if (!slot_id) {
+     console.log("Slot Id is not found");
+   }
+
    let status = 'active'
    const query = `select count(*) from patient where status=? and slot_id=?`
    db.query(query,[status,slot_id],(err,result3)=>{
